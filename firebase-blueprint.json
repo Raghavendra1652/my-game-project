@@ -1,0 +1,196 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Public player profile information for matchmaking, multiplayer and leaderboards.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 32 },
+        "av": { "type": "string", "maxLength": 8 },
+        "lvl": { "type": "number" },
+        "title": { "type": "string", "maxLength": 32 },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["name", "av", "lvl"]
+    },
+    "UserSave": {
+      "title": "UserSave",
+      "description": "Full cloud save data containing progression, currency, shop unlocks and settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 32 },
+        "av": { "type": "string", "maxLength": 8 },
+        "points": { "type": "number" },
+        "diamonds": { "type": "number" },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "title": { "type": "string", "maxLength": 32 },
+        "wins": { "type": "number" },
+        "games": { "type": "number" },
+        "streak": { "type": "number" },
+        "best": { "type": "number" },
+        "bs": { "type": "number" },
+        "owned": { "type": "array" },
+        "ach": { "type": "object" },
+        "mis": { "type": "object" },
+        "history": { "type": "array" },
+        "settings": { "type": "object" },
+        "isAnonymous": { "type": "boolean" },
+        "email": { "type": "string" },
+        "status": { "type": "string" },
+        "updatedAt": { "type": "number" },
+        "version": { "type": "number" }
+      },
+      "required": ["uid", "name", "points", "diamonds", "xp", "updatedAt"]
+    },
+    "GameRoom": {
+      "title": "GameRoom",
+      "description": "Real-time state of a multiplayer room.",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "maxLength": 6 },
+        "x": { "type": "string", "maxLength": 128 },
+        "o": { "type": "string", "maxLength": 128 },
+        "sx": { "type": "string", "maxLength": 32 },
+        "so": { "type": "string", "maxLength": 32 },
+        "board": { "type": "string", "maxLength": 500 },
+        "turn": { "type": "string", "enum": ["X", "O"] },
+        "size": { "type": "number" },
+        "winner": { "type": "string", "maxLength": 8 },
+        "status": { "type": "string", "maxLength": 32 },
+        "created": { "type": "number" },
+        "lastMoveAt": { "type": "number" },
+        "lastSeenX": { "type": "number" },
+        "lastSeenO": { "type": "number" }
+      },
+      "required": ["code", "x", "board", "turn", "size"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized staff credentials, role and permissions registry.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 64 },
+        "role": { "type": "string", "enum": ["SUPER_ADMIN", "GAME_ADMIN", "SUPPORT_STAFF", "MODERATOR", "ANALYST"] },
+        "status": { "type": "string", "enum": ["active", "suspended"] },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" },
+        "createdBy": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["uid", "email", "role", "status", "createdAt"]
+    },
+    "CurrencyTransaction": {
+      "title": "CurrencyTransaction",
+      "description": "Immutable ledger record for administrative Coins and Diamonds adjustments.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "playerId": { "type": "string", "maxLength": 16 },
+        "playerUid": { "type": "string", "maxLength": 128 },
+        "playerName": { "type": "string", "maxLength": 64 },
+        "currencyType": { "type": "string", "enum": ["coins", "diamonds"] },
+        "action": { "type": "string", "enum": ["add", "deduct"] },
+        "amount": { "type": "number" },
+        "previousBalance": { "type": "number" },
+        "newBalance": { "type": "number" },
+        "reason": { "type": "string", "maxLength": 500 },
+        "adminUid": { "type": "string", "maxLength": 128 },
+        "adminEmail": { "type": "string", "maxLength": 128 },
+        "adminRole": { "type": "string", "maxLength": 32 },
+        "idempotencyKey": { "type": "string", "maxLength": 64 },
+        "timestamp": { "type": "number" },
+        "status": { "type": "string", "enum": ["completed", "failed", "reversed"] }
+      },
+      "required": ["id", "playerId", "playerUid", "currencyType", "action", "amount", "previousBalance", "newBalance", "reason", "adminEmail", "timestamp"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable security and administrative action audit record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "category": { "type": "string", "maxLength": 32 },
+        "action": { "type": "string", "maxLength": 64 },
+        "adminUid": { "type": "string", "maxLength": 128 },
+        "adminEmail": { "type": "string", "maxLength": 128 },
+        "targetId": { "type": "string", "maxLength": 128 },
+        "details": { "type": "object" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "category", "action", "adminEmail", "timestamp"]
+    },
+    "ShopItem": {
+      "title": "ShopItem",
+      "description": "Configurable catalog items, prices and cosmetic availability.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 64 },
+        "symbol": { "type": "string", "maxLength": 8 },
+        "category": { "type": "string", "maxLength": 32 },
+        "coinPrice": { "type": "number" },
+        "diamondPrice": { "type": "number" },
+        "active": { "type": "boolean" },
+        "type": { "type": "string", "maxLength": 32 },
+        "description": { "type": "string", "maxLength": 256 },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "name", "symbol", "coinPrice", "active"]
+    },
+    "GameEvent": {
+      "title": "GameEvent",
+      "description": "In-game scheduled seasonal events and reward multipliers.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 64 },
+        "description": { "type": "string", "maxLength": 256 },
+        "eventType": { "type": "string", "maxLength": 32 },
+        "active": { "type": "boolean" },
+        "startTime": { "type": "number" },
+        "endTime": { "type": "number" },
+        "rewards": { "type": "object" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "title", "eventType", "active", "startTime", "endTime"]
+    }
+  },
+  "firestore": {
+    "/profiles/{uid}": {
+      "schema": "UserProfile",
+      "description": "Public profile details of players"
+    },
+    "/users/{uid}": {
+      "schema": "UserSave",
+      "description": "Private cloud save of user progression and wallet"
+    },
+    "/games/{gameId}": {
+      "schema": "GameRoom",
+      "description": "Active multiplayer games"
+    },
+    "/admins/{uid}": {
+      "schema": "AdminUser",
+      "description": "Staff role assignments and authorizations"
+    },
+    "/transactions/{txId}": {
+      "schema": "CurrencyTransaction",
+      "description": "Ledger of administrative currency adjustments"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Audit trail for all administrative actions"
+    },
+    "/shop_items/{itemId}": {
+      "schema": "ShopItem",
+      "description": "Game cosmetics and emoji store catalog"
+    },
+    "/events/{eventId}": {
+      "schema": "GameEvent",
+      "description": "Live and scheduled in-game events"
+    }
+  }
+}

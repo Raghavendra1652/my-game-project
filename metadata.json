@@ -1,0 +1,6 @@
+{
+  "name": "Tickle-Tac",
+  "description": "Tickle-Tac: 15x15 five-in-a-row multiplayer game with private online rooms, real-time Firestore synchronization, Google permanent accounts, and cloud save data sync.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

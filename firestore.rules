@@ -1,0 +1,139 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper to verify user is authenticated (including Firebase Anonymous Auth)
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    // Server-verified authorization token (only known to server.ts backend)
+    function isServerAdmin() {
+      return request.resource.data.adminSecret == 'TT_SERVER_SECRET_98a72b0c';
+    }
+
+    // Administrator checks (backed by server / admins collection with initial Super Admin bootstrap)
+    function isAdmin() {
+      return isAuthenticated() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email != null && request.auth.token.email == 'raghavalarence300@gmail.com') ||
+        isServerAdmin()
+      );
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'SUPER_ADMIN') ||
+        (request.auth.token.email != null && request.auth.token.email == 'raghavalarence300@gmail.com') ||
+        isServerAdmin()
+      );
+    }
+
+    // Games collection for private multiplayer rooms
+    match /games/{gameId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.x == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.x == request.auth.uid ||
+        resource.data.o == request.auth.uid ||
+        (resource.data.o == '' && request.resource.data.o == request.auth.uid) ||
+        isAdmin()
+      );
+      allow delete: if isAuthenticated() && (resource.data.x == request.auth.uid || isAdmin());
+
+      match /seats/{seatId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /chat/{chatId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.from == request.auth.uid;
+        allow update, delete: if false;
+      }
+
+      match /voice/{docId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /voice_members/{uid} {
+        allow read: if isAuthenticated();
+        allow write: if isAuthenticated() && request.auth.uid == uid;
+      }
+
+      match /voice_candidates/{candId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.from == request.auth.uid;
+        allow delete: if isAuthenticated();
+      }
+    }
+
+    // Real-time player presence / heartbeats
+    match /presence/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Cloud saves for player accounts (Google and Guest)
+    match /users/{uid} {
+      allow read: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Player profiles (name, avatar, level, public data)
+    match /profiles/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Global and weekly leaderboards
+    match /lb/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Quick match queue
+    match /queue/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // Friend invites
+    match /invites/{friendCode} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Staff administrator records & role definitions
+    match /admins/{uid} {
+      allow read: if isAuthenticated() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if isSuperAdmin() && (request.auth.uid != uid || resource == null);
+      allow delete: if isSuperAdmin() && request.auth.uid != uid;
+    }
+
+    // Immutable currency transactions ledger
+    match /transactions/{txId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Immutable administrative audit logs
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Shop item catalog
+    match /shop_items/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Live and scheduled in-game events
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}

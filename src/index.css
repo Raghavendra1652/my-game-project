@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+:root {
+  --admin-bg: #0b1424;
+  --admin-surface: #132038;
+  --admin-surface-hover: #192a4a;
+  --admin-line: #263857;
+  --admin-accent-blue: #4f8fff;
+  --admin-accent-coral: #ff5a43;
+  --admin-gold: #fbbf24;
+  --admin-diamond: #38bdf8;
+  --admin-green: #10b981;
+  --admin-text: #eef4fc;
+  --admin-muted: #889bb6;
+}
+
+/* Custom subtle scrollbars for admin tables and logs */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b1424;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #263857;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #33486c;
+}
