@@ -97,6 +97,7 @@ const db = getFirestore(fbApp);
 
   /* ---------- Progression, Modes & Meta State (Declared first to prevent TDZ) ---------- */
   let lobbyMode = lsGet('ttt-mode') || 'classic', curMode = 'classic';
+  if (lobbyMode === 'surv') lobbyMode = 'classic';
   let lad = { stage: 0, run: 0, over: '' }, lastMsg = '';
   try {
     const savedLad = lsGet('ttt-lad');
@@ -113,20 +114,18 @@ const db = getFirestore(fbApp);
   }
 
   const MODES: [string, string][] = [
-    ['classic', 'Classic'],
-    ['blitz', 'Blitz'],
-    ['bo3', 'Best of 3'],
-    ['tour', 'Tournament'],
-    ['surv', 'Survival'],
-    ['random', 'Random']
+    ['classic', 'Classic Arena'],
+    ['blitz', 'Blitz Combat'],
+    ['bo3', 'Duel of Champions'],
+    ['tour', 'Championship'],
+    ['random', 'Supply Drop']
   ];
   const MODE_INFO: Record<string, string> = {
-    classic: 'Standard rules with your chosen timer.',
-    blitz: 'Only 5 seconds per move. Think fast!',
-    bo3: 'Three rounds: first to win 2 takes the series.',
-    tour: 'Win a 3-match bracket against computer rivals. Lose once and you are out.',
-    surv: 'Keep winning to stay alive. One loss ends the run, and the computer gets sharper.',
-    random: 'Blocked squares appear at random every round (boards 4×4 and up).'
+    classic: 'Standard five-in-a-row rules with tactical move timer.',
+    blitz: 'Only 5 seconds per move. Fast thinking or forfeit.',
+    bo3: 'Best of 3 rounds: first to win 2 takes the series.',
+    tour: '3-round single elimination bracket against elite rival bots.',
+    random: 'Blocked hazard tiles appear randomly on board each round.'
   };
   const STAGES = ['Quarter-final', 'Semi-final', 'Final'], OPP = ['Bolt 🤖', 'Nova 🤖', 'Rex 🤖'];
   const AVS: [string, number][] = [['🙂', 1], ['😎', 1], ['🐱', 1], ['🦊', 2], ['🐼', 3], ['🦁', 4], ['🐉', 6], ['👾', 8], ['🥷', 10], ['🧙', 12], ['👑', 15], ['🦄', 18]];
@@ -270,7 +269,7 @@ const db = getFirestore(fbApp);
   }
 
   function effMode(kind: 'cpu' | 'local' | 'online') {
-    return (kind !== 'cpu' && (lobbyMode === 'tour' || lobbyMode === 'surv')) ? 'classic' : lobbyMode;
+    return (kind !== 'cpu' && lobbyMode === 'tour') ? 'classic' : lobbyMode;
   }
   function modeTl() { return curMode === 'blitz' ? 5 : timerSecs; }
 
@@ -281,7 +280,6 @@ const db = getFirestore(fbApp);
   function opp() { return curMode === 'tour' ? OPP[Math.min(lad.stage, 2)] : 'Computer'; }
   function effAiDiff(): string {
     if (curMode === 'tour') return lad.stage === 0 ? 'easy' : lad.stage === 1 ? 'medium' : 'hard';
-    if (curMode === 'surv') return lad.run < 2 ? 'easy' : lad.run < 5 ? 'medium' : 'hard';
     return aiDifficulty;
   }
 
@@ -297,7 +295,7 @@ const db = getFirestore(fbApp);
       saveLad();
     }
     const m = g.mode || 'classic';
-    return (m === 'tour' || m === 'surv' || (m === 'bo3' && (g.wx >= 2 || g.wo >= 2))) ? { wx: 0, wo: 0, wd: 0 } : {};
+    return (m === 'tour' || (m === 'bo3' && (g.wx >= 2 || g.wo >= 2))) ? { wx: 0, wo: 0, wd: 0 } : {};
   }
 
   function getRematchButtonText(): string {
@@ -468,8 +466,12 @@ const db = getFirestore(fbApp);
   function updateWallet() {
     const ptsEl = $('pts');
     if (ptsEl) ptsEl.textContent = String(points);
+    const dCount = $('diamonds-count');
+    if (dCount) dCount.textContent = String(M?.diamonds || 0);
+    const dWalletBtn = $('diamond-wallet-btn');
+    if (dWalletBtn) dWalletBtn.setAttribute('aria-label', 'Diamond exchange: You have ' + (M?.diamonds || 0) + ' diamonds');
     const walletEl = $('wallet');
-    if (walletEl) walletEl.setAttribute('aria-label', 'Open emoji shop. You have ' + points + ' points');
+    if (walletEl) walletEl.setAttribute('aria-label', 'Open emoji shop. You have ' + points + ' coins');
     const low = points < MSG_COST;
     const sendBtn = $('chat-send');
     if (sendBtn) sendBtn.disabled = false;
@@ -529,8 +531,8 @@ const db = getFirestore(fbApp);
     const diamondList = $('diamond-packs');
     if (!list || !diamondList) return;
     DIAMOND_PACKS.forEach(function (pack) {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'item';
-      b.innerHTML = '<span class="em" aria-hidden="true">💎</span><span class="pr">' + pack.diamonds + ' 💎 · ' + pack.coins + ' 🪙</span>';
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'item rarity-legendary';
+      b.innerHTML = '<span class="rarity-badge rarity-legendary">PACK</span><span class="em" aria-hidden="true">💎</span><span class="pr" style="color:var(--gold-bright);font-weight:800;">' + pack.diamonds + ' 💎 · ' + pack.coins + ' 🪙</span>';
       b.addEventListener('click', function () { buyDiamondPack(pack); });
       diamondList.appendChild(b);
     });
@@ -538,10 +540,12 @@ const db = getFirestore(fbApp);
       const t = document.createElement('div'); t.className = 'tier';
       t.innerHTML = '<h3>' + title + ' <span>' + sub + '</span></h3>';
       const g = document.createElement('div'); g.className = 'eg';
+      const rarityClass = price === 0 ? 'rarity-common' : price <= 30 ? 'rarity-rare' : price <= 75 ? 'rarity-epic' : 'rarity-legendary';
+      const rarityLabel = price === 0 ? 'COMMON' : price <= 30 ? 'RARE' : price <= 75 ? 'EPIC' : 'LEGEND';
       items.forEach(function (p) {
         const b = document.createElement('button');
-        b.type = 'button'; b.className = 'item'; b.setAttribute('aria-pressed', 'false');
-        b.innerHTML = '<span class="em" aria-hidden="true">' + p[0] + '</span><span class="pr"></span>';
+        b.type = 'button'; b.className = 'item ' + rarityClass; b.setAttribute('aria-pressed', 'false');
+        b.innerHTML = '<span class="rarity-badge ' + rarityClass + '">' + rarityLabel + '</span><span class="em" aria-hidden="true">' + p[0] + '</span><span class="pr"></span>';
         b.addEventListener('click', function () { shopSel = p[0]; refreshShop(); });
         shopBtns[p[0]] = b; g.appendChild(b);
       });
@@ -601,6 +605,7 @@ const db = getFirestore(fbApp);
 
   function openShop() {
     buildShop(); refreshShop();
+    setBottomNavTab('shop');
     const d = $('shop'); if (d && !d.open) d.showModal();
   }
 
@@ -1280,20 +1285,111 @@ const db = getFirestore(fbApp);
     if (el) el.textContent = onlineN === null ? 'Online: –' : '🟢 ' + onlineN + ' online';
   }
 
+  const MODE_METAS: Record<string, { title: string; icon: string; badge: string; tagClass: string; desc: string }> = {
+    classic: {
+      title: 'Classic Arena',
+      icon: '🎯',
+      badge: 'TACTICAL',
+      tagClass: 'badge-blue',
+      desc: 'Standard five-in-a-row rules with tactical move timer.'
+    },
+    blitz: {
+      title: 'Blitz Combat',
+      icon: '⚡',
+      badge: '5-SEC TURNS',
+      tagClass: 'badge-orange',
+      desc: 'High pressure: 5 seconds per move. Fast thinking or forfeit.'
+    },
+    bo3: {
+      title: 'Duel of Champions',
+      icon: '⚔️',
+      badge: 'SERIES BO3',
+      tagClass: 'badge-gold',
+      desc: 'Best of 3 rounds: first to win 2 takes the series.'
+    },
+    tour: {
+      title: 'Championship',
+      icon: '🏆',
+      badge: 'KNOCKOUT',
+      tagClass: 'badge-gold',
+      desc: '3-round single elimination bracket against elite rival bots.'
+    },
+    random: {
+      title: 'Supply Drop',
+      icon: '📦',
+      badge: 'WILDCARD',
+      tagClass: 'badge-orange',
+      desc: 'Blocked hazard tiles appear randomly on board each round.'
+    }
+  };
+
+  function toggleTournamentBanner() {
+    const tourCard = $('lobby-tournament-card');
+    if (tourCard) {
+      tourCard.hidden = lobbyMode !== 'tour';
+    }
+  }
+
+  function updateDeploySub() {
+    const deploySub = $('play-now-sub');
+    if (deploySub) {
+      const meta = MODE_METAS[lobbyMode];
+      const mName = meta ? meta.title.toUpperCase() : 'ARENA';
+      deploySub.textContent = mName + ' • ' + sizeSel + '×' + sizeSel;
+    }
+    const badge = $('calib-summary-badge');
+    if (badge) {
+      const diff = lsGet('ttt-ai') || 'medium';
+      const diffStr = diff.charAt(0).toUpperCase() + diff.slice(1);
+      const t = lsGet('ttt-timer');
+      const tSec = t !== null && /^(0|15|30|60)$/.test(t) ? +t : 30;
+      const timerStr = tSec === 0 ? 'Timer Off' : tSec + 's';
+      badge.textContent = sizeSel + '×' + sizeSel + ' · ' + timerStr + ' · ' + diffStr;
+    }
+  }
+
   function renderModes() {
     const box = $('mode-seg'); if (!box) return;
     box.innerHTML = '';
     MODES.forEach(function (m) {
-      const b = document.createElement('button');
-      b.type = 'button'; b.textContent = m[1];
-      b.setAttribute('aria-pressed', String(lobbyMode === m[0]));
-      b.addEventListener('click', function () {
-        lobbyMode = m[0]; lsSet('ttt-mode', lobbyMode); renderModes();
+      const modeKey = m[0];
+      const meta = MODE_METAS[modeKey] || {
+        title: m[1],
+        icon: '🎯',
+        badge: 'MODE',
+        tagClass: 'badge-blue',
+        desc: MODE_INFO[modeKey] || ''
+      };
+      const isSelected = lobbyMode === modeKey;
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'game-mode-tile' + (isSelected ? ' active' : '');
+      card.setAttribute('aria-pressed', String(isSelected));
+      card.innerHTML =
+        '<div class="mode-tile-header">' +
+          '<div class="mode-tile-title-group">' +
+            '<span class="mode-tile-icon">' + meta.icon + '</span>' +
+            '<span class="mode-tile-name">' + meta.title + '</span>' +
+          '</div>' +
+          '<div class="mode-tile-tags">' +
+            '<span class="mode-badge ' + meta.tagClass + '">' + meta.badge + '</span>' +
+            (isSelected ? '<span class="mode-selected-tag">✓ SELECTED</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<p class="mode-tile-desc">' + meta.desc + '</p>';
+      card.addEventListener('click', function () {
+        lobbyMode = modeKey;
+        lsSet('ttt-mode', lobbyMode);
+        renderModes();
+        updateDeploySub();
+        toggleTournamentBanner();
       });
-      box.appendChild(b);
+      box.appendChild(card);
     });
     const hint = $('mode-hint');
     if (hint) hint.textContent = MODE_INFO[lobbyMode];
+    updateDeploySub();
+    toggleTournamentBanner();
   }
 
   /* ---------- Game State Interfaces & Variables ---------- */
@@ -1923,14 +2019,25 @@ const db = getFirestore(fbApp);
     if (G) {
       for (let k = 0; k < G.board.length; k++) {
         const m = G.board[k];
-        if (m === '.' || m === '#') continue;
+        if (m === '.') continue;
+        if (m === '#') {
+          const bx = (k % N) * CELL, by = ((k / N) | 0) * CELL;
+          s += '<rect x="' + (bx + 2) + '" y="' + (by + 2) + '" width="' + (CELL - 4) + '" height="' + (CELL - 4) + '" rx="4" fill="rgba(245, 158, 11, 0.15)" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="4 2"/>';
+          s += '<text x="' + (bx + CELL / 2) + '" y="' + (by + CELL / 2) + '" text-anchor="middle" dominant-baseline="central" font-size="' + (CELL * 0.42) + '" fill="var(--warn)">⚠️</text>';
+          continue;
+        }
         s += markSvg(m as 'X' | 'O', (k % N) * CELL, ((k / N) | 0) * CELL, k === G.last && G.n !== renderedN);
       }
     }
     s += '<rect x="0" y="0" width="' + VB + '" height="' + VB + '" fill="none" stroke="var(--line)" stroke-width="3"/>';
     if (G && cells.length) {
       const a = G.line[0], z = G.line[1];
-      s += '<line x1="' + ((a % N) * CELL + CELL / 2) + '" y1="' + (((a / N) | 0) * CELL + CELL / 2) + '" x2="' + ((z % N) * CELL + CELL / 2) + '" y2="' + (((z / N) | 0) * CELL + CELL / 2) + '" stroke="' + wcol + '" stroke-width="6" stroke-linecap="round" opacity="0.9"/>';
+      const x1 = (a % N) * CELL + CELL / 2;
+      const y1 = ((a / N) | 0) * CELL + CELL / 2;
+      const x2 = (z % N) * CELL + CELL / 2;
+      const y2 = ((z / N) | 0) * CELL + CELL / 2;
+      s += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + wcol + '" stroke-width="14" stroke-linecap="round" class="laser-beam-aura"/>';
+      s += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" class="laser-beam-core"/>';
     }
     return s;
   }
@@ -1959,6 +2066,21 @@ const db = getFirestore(fbApp);
     updateSub();
     const lobby = $('lobby'); if (lobby) lobby.hidden = inGame;
     const game = $('game'); if (game) game.hidden = !inGame;
+    const bNav = $('bottom-nav'); if (bNav) bNav.hidden = inGame;
+    const appEl = $('app'); if (appEl) appEl.classList.toggle('in-game', inGame);
+    const tourBanner = $('tour-matchup-banner');
+    if (tourBanner) {
+      const isTour = !!(G && G.mode === 'tour' && ctx.kind === 'cpu');
+      tourBanner.hidden = !isTour;
+      if (isTour) {
+        const sName = $('tour-stage-name');
+        if (sName) sName.textContent = (STAGES[Math.min(lad.stage, 2)] || 'STAGE').toUpperCase();
+        const tOpp = $('tour-team-opp');
+        if (tOpp) tOpp.textContent = (OPP[Math.min(lad.stage, 2)] || 'BOT').toUpperCase();
+        const tMe = $('tour-team-me');
+        if (tMe) tMe.textContent = (M.name || 'YOU').toUpperCase();
+      }
+    }
     if (!inGame) return;
 
     if (G) {
@@ -2769,6 +2891,7 @@ const db = getFirestore(fbApp);
     const sh = $('size-hint'); if (sh) sh.textContent = 'Get ' + w + ' in a row to win. Smaller boards finish faster.';
     const bs = document.querySelectorAll('#size-seg button') as NodeListOf<HTMLButtonElement>;
     for (let i = 0; i < bs.length; i++) bs[i].setAttribute('aria-pressed', String(+bs[i].dataset.n! === sizeSel));
+    updateDeploySub();
   }
   (function () {
     const bs = document.querySelectorAll('#size-seg button') as NodeListOf<HTMLButtonElement>;
@@ -2838,6 +2961,7 @@ const db = getFirestore(fbApp);
         timerSecs = +this.dataset.t!;
         lsSet('ttt-timer', String(timerSecs));
         syncTimerSeg();
+        updateDeploySub();
       });
     }
     syncTimerSeg();
@@ -3931,6 +4055,106 @@ const db = getFirestore(fbApp);
         hubDailyBtn.classList.remove('claimed');
       }
     }
+
+    // 7-Day Streak Nodes inside #lobby-streak-track
+    const streakTrack = $('lobby-streak-track');
+    if (streakTrack) {
+      let sHtml = '';
+      for (let d = 1; d <= 7; d++) {
+        const isPastClaimed = (claimedToday && d <= displayDay) || (!claimedToday && d < displayDay);
+        const isTodayNode = d === displayDay;
+        const isCurrentPending = isTodayNode && !claimedToday;
+        const nodeClass = 'streak-day-node' + (isPastClaimed ? ' claimed' : isCurrentPending ? ' active' : '');
+        const rewardVal = 10 + Math.min(d, 7) * 5;
+        sHtml += '<div class="' + nodeClass + '">' +
+          '<span class="streak-day-label">D' + d + '</span>' +
+          '<span class="streak-day-reward">+' + rewardVal + '</span>' +
+          '<span class="streak-day-check">' + (isPastClaimed ? '✅' : isCurrentPending ? '🎁' : '🔒') + '</span>' +
+        '</div>';
+      }
+      streakTrack.innerHTML = sHtml;
+    }
+
+    // Active Tactical Missions inside #lobby-missions-list
+    const misList = $('lobby-missions-list');
+    if (misList) {
+      let mHtml = '';
+      missions().forEach(function (i) {
+        const m = POOL[i];
+        if (!m) return;
+        const isDone = !!M.mis.done[i];
+        const prog = Math.min(M.mis.p[i] || 0, m[2]);
+        mHtml += '<div class="lobby-mission-item">' +
+          '<span>' + (isDone ? '✅ ' : '🎯 ') + esc(m[0]) + '</span>' +
+          '<span class="mission-progress-badge' + (isDone ? ' done' : '') + '">' +
+            (isDone ? 'COMPLETED' : prog + '/' + m[2]) +
+          '</span>' +
+        '</div>';
+      });
+      misList.innerHTML = mHtml;
+    }
+  }
+
+  function updateTournamentUI() {
+    const statusEl = $('lobby-tour-status');
+    const btnEl = $('lobby-tour-enter-btn') as HTMLButtonElement | null;
+    const hintEl = $('lobby-tour-hint');
+    const n1 = $('t-node-1');
+    const n2 = $('t-node-2');
+    const n3 = $('t-node-3');
+
+    const curStage = Math.min(lad.stage, 2);
+    const isChamp = lad.over === 'champ' || lad.stage >= 3;
+    const isOut = lad.over === 'out';
+
+    if (statusEl) {
+      if (isChamp) {
+        statusEl.textContent = 'CHAMPION 🏆';
+        statusEl.className = 't-bracket-status gold';
+      } else if (isOut) {
+        statusEl.textContent = 'ELIMINATED (' + STAGES[curStage] + ')';
+        statusEl.className = 't-bracket-status red';
+      } else {
+        statusEl.textContent = STAGES[curStage].toUpperCase() + ' (vs ' + OPP[curStage] + ')';
+        statusEl.className = 't-bracket-status';
+      }
+    }
+
+    if (hintEl) {
+      if (isChamp) {
+        hintEl.textContent = 'Victory! You defeated all 3 opponents and claimed the championship prize.';
+      } else if (isOut) {
+        hintEl.textContent = 'Eliminated in the ' + STAGES[curStage] + '. Click Retry to start a new championship run.';
+      } else {
+        hintEl.textContent = 'Current round: ' + STAGES[curStage] + ' vs ' + OPP[curStage] + '. Win single-elimination to advance.';
+      }
+    }
+
+    if (btnEl) {
+      if (isChamp) {
+        btnEl.textContent = 'Defend Title (New Tournament)';
+      } else if (isOut) {
+        btnEl.textContent = 'Retry Tournament';
+      } else if (curStage === 0) {
+        btnEl.textContent = 'Enter Quarter-Final (vs Bolt 🤖)';
+      } else if (curStage === 1) {
+        btnEl.textContent = 'Enter Semi-Final (vs Nova 🤖)';
+      } else if (curStage === 2) {
+        btnEl.textContent = 'Enter Grand Final (vs Rex 🤖)';
+      } else {
+        btnEl.textContent = 'Enter Tournament';
+      }
+    }
+
+    if (n1) {
+      n1.className = 'tour-bracket-node' + ((lad.stage > 0 || isChamp) ? ' won' : curStage === 0 ? (isOut ? ' lost' : ' active') : '');
+    }
+    if (n2) {
+      n2.className = 'tour-bracket-node' + ((lad.stage > 1 || isChamp) ? ' won' : curStage === 1 ? (isOut ? ' lost' : ' active') : '');
+    }
+    if (n3) {
+      n3.className = 'tour-bracket-node' + (isChamp ? ' won' : curStage === 2 ? (isOut ? ' lost' : ' active') : '');
+    }
   }
 
   async function claimDailyReward(): Promise<void> {
@@ -4112,12 +4336,7 @@ const db = getFirestore(fbApp);
       }
       saveLad();
       saveLocalGame();
-    } else if (mode === 'surv' && ctx.kind === 'cpu') {
-      if (mine) {
-        lad.run++; M.bs = Math.max(M.bs, lad.run);
-        if (lad.run >= 5) ach('surv5');
-        msg += 'Streak ' + lad.run + '. Keep going!';
-      } else { lad.over = 'out'; msg += 'Run over after ' + lad.run + ' win' + (lad.run === 1 ? '' : 's') + '.'; }
+      updateTournamentUI();
     }
     lastMsg = msg; saveM(); pushLb();
     return msg;
@@ -4186,13 +4405,24 @@ const db = getFirestore(fbApp);
     }, function () {});
   }
 
-  function qmReset() { const b = $('qm'); if (b) { b.textContent = 'Quick Match'; b.disabled = !netOk(); } }
+  function qmReset() {
+    const b = $('qm') as HTMLButtonElement | null;
+    if (b) {
+      b.textContent = '⚡ Quick Match';
+      b.disabled = !netOk();
+      b.hidden = false;
+    }
+    const box = $('qm-status-box');
+    if (box) box.hidden = true;
+  }
+
   function qmCancel() {
     clearTimeout(qmT);
     const qmBtn = $('qm');
-    if (netOk() && qmBtn && qmBtn.textContent === 'Searching…' && myId) {
+    if (netOk() && myId) {
       setDoc(doc(db, 'queue', myId), { t: 0, code: '', size: 0 }).catch(function () {});
     }
+    toast('Matchmaking cancelled.');
     qmReset();
   }
 
@@ -4201,8 +4431,15 @@ const db = getFirestore(fbApp);
       showMsg('Online play is not connected yet. Please wait for Firebase initialization.');
       return;
     }
-    const qmBtn = $('qm');
-    if (qmBtn) { qmBtn.disabled = true; qmBtn.textContent = 'Searching…'; }
+    const qmBtn = $('qm') as HTMLButtonElement | null;
+    const box = $('qm-status-box');
+    const statusText = $('qm-status-text');
+    if (qmBtn) {
+      qmBtn.disabled = true;
+      qmBtn.hidden = true;
+    }
+    if (box) box.hidden = false;
+    if (statusText) statusText.textContent = 'Searching for opponent…';
 
     try {
       const qColl = collection(db, 'queue');
@@ -4217,6 +4454,7 @@ const db = getFirestore(fbApp);
 
         const f = list.filter(function (v) { return v._id !== myId && v.code && Date.now() - v.t < 30000; })[0];
         if (f) {
+          if (statusText) statusText.textContent = 'Opponent found! Connecting…';
           await setDoc(doc(db, 'queue', f._id), { t: 0, code: '', size: 0 });
           joinCode(f.code);
           qmReset();
@@ -4279,12 +4517,57 @@ const db = getFirestore(fbApp);
     });
     wkEnsure(); snEnsure();
     if (hubTab === 'profile') {
+      const pid = 'TT-' + (fcode() || '8K29XQ');
+      const wins = M.wins;
+      const games = M.games;
+      const losses = Math.max(0, games - wins);
+      const winRate = games > 0 ? Math.round((wins / games) * 100) : 0;
+      const a = xpFor(l), b = xpFor(l + 1);
+      const curXp = M.xp - a;
+      const needXp = b - a;
+      const xpPct = Math.min(100, Math.round((curXp / needXp) * 100));
+      const achCount = Object.keys(M.ach || {}).length;
+      const unlockedAvCount = AVS.filter(function (av) { return l >= av[1]; }).length;
+      const ownedItemsCount = Object.keys(owned || {}).length;
+      const totalUnlocked = unlockedAvCount + ownedItemsCount;
+
+      h += '<div class="profile-hero-card">' +
+        '<div class="profile-hero-top">' +
+          '<div class="profile-hero-av" aria-label="Current Avatar">' + esc(M.av) + '</div>' +
+          '<div class="profile-hero-meta">' +
+            '<div class="profile-hero-name-row">' +
+              '<span class="profile-hero-name">' + esc(M.name) + '</span>' +
+              '<span class="profile-rank-badge">' + title() + '</span>' +
+            '</div>' +
+            '<div class="profile-id-tag">PERMANENT ID: <b style="color:var(--fg);letter-spacing:0.08em;">' + pid + '</b></div>' +
+            '<div style="margin-top:4px;">' +
+              '<div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.68rem;color:var(--muted);font-weight:700;margin-bottom:2px;">' +
+                '<span>LEVEL ' + l + '</span>' +
+                '<span>' + curXp + ' / ' + needXp + ' XP (' + xpPct + '%)</span>' +
+              '</div>' +
+              '<div class="pbar" style="height:6px;background:#090e16;border:1px solid var(--line);border-radius:4px;overflow:hidden;">' +
+                '<div style="height:100%;width:' + xpPct + '%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:3px;"></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="profile-stats-grid">' +
+          '<div class="p-stat-card"><span class="p-stat-label">TOTAL MATCHES</span><span class="p-stat-val">' + games + '</span></div>' +
+          '<div class="p-stat-card"><span class="p-stat-label">W / L RECORD</span><span class="p-stat-val" style="color:var(--online);">' + wins + '<span style="color:var(--muted);font-size:0.85rem;">W</span> <span style="color:var(--line);">/</span> <span style="color:var(--o);">' + losses + '<span style="color:var(--muted);font-size:0.85rem;">L</span></span></div>' +
+          '<div class="p-stat-card"><span class="p-stat-label">WIN RATE</span><span class="p-stat-val" style="color:var(--x);">' + winRate + '%</span></div>' +
+          '<div class="p-stat-card"><span class="p-stat-label">WIN STREAK</span><span class="p-stat-val" style="color:var(--gold-bright);">' + M.streak + ' <span style="color:var(--muted);font-size:0.7rem;">(BEST ' + M.best + ')</span></span></div>' +
+          '<div class="p-stat-card"><span class="p-stat-label">ACHIEVEMENTS</span><span class="p-stat-val">' + achCount + ' <span style="color:var(--muted);font-size:0.7rem;">/ ' + ACH.length + '</span></span></div>' +
+          '<div class="p-stat-card"><span class="p-stat-label">UNLOCKED ITEMS</span><span class="p-stat-val">' + totalUnlocked + '</span></div>' +
+        '</div>' +
+      '</div>';
+
       h += '<label class="setting"><span class="lab">Display name</span><input id="h-name" class="txt" maxlength="14" value="' + esc(M.name) + '"></label><span class="sub">Avatars unlock as you level up</span><div class="eg">';
       AVS.forEach(function (a) {
         const ok = l >= a[1];
         h += '<button type="button" class="item' + (ok ? '' : ' locked') + '" data-act="av" data-v="' + a[0] + '" aria-pressed="' + (M.av === a[0]) + '"' + (ok ? '' : ' disabled') + '><span class="em">' + a[0] + '</span><span class="pr">' + (ok ? '' : 'Lv ' + a[1]) + '</span></button>';
       });
-      h += '</div><p class="hint">💎 ' + M.diamonds + ' Diamonds · 🪙 ' + points + ' coins<br>Level ' + l + ' · ' + title() + ' · ' + M.xp + ' XP<br>' + M.wins + ' wins · ' + M.games + ' games · best streak ' + M.best + ' · best survival ' + M.bs + '</p>';
+      h += '</div><p class="hint">💎 ' + M.diamonds + ' Diamonds · 🪙 ' + points + ' coins<br>Winning streak: ' + M.streak + ' (best: ' + M.best + ')</p>';
     } else if (hubTab === 'daily') {
       const claimedToday = M.lastLogin === td, nd = nextDay();
       const displayDay = claimedToday ? M.loginDay : nd;
@@ -4416,6 +4699,9 @@ const db = getFirestore(fbApp);
   function openHub(t?: string) {
     hubTab = t || hubTab;
     renderHub();
+    if (hubTab === 'profile') setBottomNavTab('profile');
+    else if (hubTab === 'daily') setBottomNavTab('rewards');
+    else setBottomNavTab('more');
     const d = $('hub');
     if (d && !d.open) d.showModal();
   }
@@ -4506,10 +4792,66 @@ const db = getFirestore(fbApp);
   const pHub = $('p-hub'); if (pHub) pHub.addEventListener('click', function () { openHub('daily'); });
   const pAv = $('p-av'); if (pAv) pAv.addEventListener('click', function () { openHub('profile'); });
   const hubClose = $('hub-close'); if (hubClose) hubClose.addEventListener('click', function () { const h = $('hub'); if (h) h.close(); });
+  function setBottomNavTab(t: 'home' | 'profile' | 'shop' | 'rewards' | 'more') {
+    (document.querySelectorAll('#bottom-nav .bnav-item') as NodeListOf<HTMLButtonElement>).forEach(function (btn) {
+      const match = btn.dataset.nav === t;
+      btn.classList.toggle('active', match);
+      btn.setAttribute('aria-selected', String(match));
+    });
+  }
+
   const hubDlg = $('hub');
   if (hubDlg) {
     hubDlg.addEventListener('click', function (this: HTMLDialogElement, e: MouseEvent) { if (e.target === this) this.close(); });
-    hubDlg.addEventListener('close', renderProfile);
+    hubDlg.addEventListener('close', function () {
+      renderProfile();
+      if (ctx.kind === null) setBottomNavTab('home');
+    });
+  }
+  const shopDlg = $('shop');
+  if (shopDlg) {
+    shopDlg.addEventListener('close', function () {
+      if (ctx.kind === null) setBottomNavTab('home');
+    });
+  }
+
+  /* ---------- Mobile Bottom Navigation Bar Listeners ---------- */
+  const bnavHome = $('bnav-home');
+  if (bnavHome) {
+    bnavHome.addEventListener('click', function () {
+      const h = $('hub') as HTMLDialogElement | null; if (h && h.open) h.close();
+      const s = $('shop') as HTMLDialogElement | null; if (s && s.open) s.close();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setBottomNavTab('home');
+    });
+  }
+  const bnavProfile = $('bnav-profile');
+  if (bnavProfile) {
+    bnavProfile.addEventListener('click', function () {
+      const s = $('shop') as HTMLDialogElement | null; if (s && s.open) s.close();
+      openHub('profile');
+    });
+  }
+  const bnavShop = $('bnav-shop');
+  if (bnavShop) {
+    bnavShop.addEventListener('click', function () {
+      const h = $('hub') as HTMLDialogElement | null; if (h && h.open) h.close();
+      openShop();
+    });
+  }
+  const bnavRewards = $('bnav-rewards');
+  if (bnavRewards) {
+    bnavRewards.addEventListener('click', function () {
+      const s = $('shop') as HTMLDialogElement | null; if (s && s.open) s.close();
+      openHub('daily');
+    });
+  }
+  const bnavMore = $('bnav-more');
+  if (bnavMore) {
+    bnavMore.addEventListener('click', function () {
+      const s = $('shop') as HTMLDialogElement | null; if (s && s.open) s.close();
+      openHub('ranks');
+    });
   }
   const qmBtn = $('qm'); if (qmBtn) qmBtn.addEventListener('click', quickMatch);
   const invBtn = $('invite'); if (invBtn) invBtn.addEventListener('click', invite);
@@ -4639,6 +4981,7 @@ const db = getFirestore(fbApp);
       (document.querySelectorAll('#ai-difficulty button') as NodeListOf<HTMLButtonElement>).forEach(function (x) {
         x.setAttribute('aria-pressed', String(x.dataset.ai === aiDifficulty));
       });
+      updateDeploySub();
       toast('Computer difficulty: ' + aiDifficulty);
     });
   });
@@ -4734,7 +5077,27 @@ const db = getFirestore(fbApp);
     });
   }
   const wBtn = $('wallet'); if (wBtn) wBtn.addEventListener('click', openShop);
+  const dWalletBtn = $('diamond-wallet-btn'); if (dWalletBtn) dWalletBtn.addEventListener('click', openShop);
+  const deployBtn = $('play-now-deploy');
+  if (deployBtn) {
+    deployBtn.addEventListener('click', function () {
+      sfx('pop');
+      startLocal('cpu');
+    });
+  }
   const csBtn = $('chat-shop'); if (csBtn) csBtn.addEventListener('click', openShop);
+  const qmCancelBtn = $('qm-cancel');
+  if (qmCancelBtn) {
+    qmCancelBtn.addEventListener('click', function () {
+      qmCancel();
+    });
+  }
+  const progRanks = $('prog-ranks-btn');
+  if (progRanks) progRanks.addEventListener('click', function () { openHub('ranks'); });
+  const progShop = $('prog-shop-btn');
+  if (progShop) progShop.addEventListener('click', openShop);
+  const progAch = $('prog-ach-btn');
+  if (progAch) progAch.addEventListener('click', function () { openHub('badges'); });
   const sClose = $('shop-close'); if (sClose) sClose.addEventListener('click', function () { const s = $('shop'); if (s) s.close(); });
   const buyBtn = $('buy-btn'); if (buyBtn) buyBtn.addEventListener('click', buySelected);
   const winClose = $('win-close'); if (winClose) winClose.addEventListener('click', function () { const w = $('win'); if (w) w.close(); });
@@ -4890,9 +5253,28 @@ const db = getFirestore(fbApp);
     });
   }
 
+  // Lobby Tournament Enter Button Wiring
+  const lobbyTourBtn = $('lobby-tour-enter-btn');
+  if (lobbyTourBtn) {
+    lobbyTourBtn.addEventListener('click', function () {
+      if (lad.over) {
+        lad = { stage: 0, run: 0, over: '' };
+        saveLad();
+        updateTournamentUI();
+      }
+      lobbyMode = 'tour';
+      lsSet('ttt-mode', lobbyMode);
+      renderModes();
+      updateDeploySub();
+      sfx('play', 0);
+      startLocal('cpu');
+    });
+  }
+
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
       updateDailyUI();
+      updateTournamentUI();
       if (hubTab === 'daily') renderHub();
       // Immediately pulse an active heartbeat if in an active online match
       if (ctx.kind === 'online' && gameRef && G && ctx.me && myId && G.status === 'playing' && !G.winner) {
@@ -4912,6 +5294,7 @@ const db = getFirestore(fbApp);
   renderOnline();
   refreshHintButton();
   updateDailyUI();
+  updateTournamentUI();
   render();
 
   // Handle potential redirect result after signInWithRedirect / linkWithRedirect

@@ -364,6 +364,101 @@ staffRegistry.set('raghavalarence300@gmail.com', {
   createdBy: 'SYSTEM_BOOTSTRAP',
 });
 
+// Helper to resolve admin user from Firebase ID Token and check custom claims / Super Admin
+async function resolveAdminUserFromIdToken(idToken: string): Promise<AdminUser | null> {
+  try {
+    const lookupRes = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseConfig.apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      }
+    );
+
+    if (!lookupRes.ok) {
+      console.warn('Identity toolkit lookup failed with status:', lookupRes.status);
+      return null;
+    }
+
+    const data = await lookupRes.json();
+    const userRecord = data.users?.[0];
+    if (!userRecord || !userRecord.email) {
+      return null;
+    }
+
+    const userEmail = userRecord.email.toLowerCase();
+    const userUid = userRecord.localId || 'firebase_' + seed(userEmail);
+    const displayName = userRecord.displayName || userEmail.split('@')[0];
+
+    // Check custom claims from Firebase Authentication
+    let customRole: AdminRole | undefined;
+    if (userRecord.customAttributes) {
+      try {
+        const claims = JSON.parse(userRecord.customAttributes);
+        if (claims.role && ['SUPER_ADMIN', 'GAME_ADMIN', 'SUPPORT_STAFF', 'MODERATOR', 'ANALYST'].includes(claims.role)) {
+          customRole = claims.role as AdminRole;
+        } else if (claims.superAdmin === true || claims.isSuperAdmin === true) {
+          customRole = 'SUPER_ADMIN';
+        } else if (claims.admin === true || claims.isAdmin === true) {
+          customRole = 'GAME_ADMIN';
+        }
+      } catch (err) {
+        console.warn('Error parsing custom claims:', err);
+      }
+    }
+
+    // Check staff registry by email or UID
+    let adminUser = staffRegistry.get(userEmail) || staffRegistry.get(userUid);
+
+    // Auto-bootstrap runtime project owner as SUPER_ADMIN
+    if (userEmail === 'raghavalarence300@gmail.com') {
+      if (!adminUser) {
+        adminUser = {
+          uid: userUid,
+          email: userRecord.email,
+          name: displayName + ' (Super Admin)',
+          role: 'SUPER_ADMIN',
+          status: 'active',
+          createdAt: Date.now(),
+          lastLogin: Date.now(),
+          createdBy: 'AUTO_BOOTSTRAP',
+        };
+        staffRegistry.set(userEmail, adminUser);
+      } else {
+        adminUser.role = 'SUPER_ADMIN';
+        adminUser.status = 'active';
+      }
+      return adminUser;
+    }
+
+    // If verified custom claims specify an admin role
+    if (customRole) {
+      if (!adminUser) {
+        adminUser = {
+          uid: userUid,
+          email: userRecord.email,
+          name: displayName,
+          role: customRole,
+          status: 'active',
+          createdAt: Date.now(),
+          lastLogin: Date.now(),
+          createdBy: 'CUSTOM_CLAIMS',
+        };
+        staffRegistry.set(userEmail, adminUser);
+      } else {
+        adminUser.role = customRole;
+      }
+      return adminUser;
+    }
+
+    return adminUser || null;
+  } catch (err) {
+    console.error('Error in resolveAdminUserFromIdToken:', err);
+    return null;
+  }
+}
+
 // Authentication middleware for /api/admin/*
 async function authenticateAdmin(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -373,7 +468,7 @@ async function authenticateAdmin(req: Request, res: Response, next: NextFunction
 
   const token = authHeader.split('Bearer ')[1].trim();
 
-  // Check in-memory active tokens first
+  // 1. Check in-memory active tokens first
   if (activeTokens.has(token)) {
     const adminUser = activeTokens.get(token)!;
     if (adminUser.status === 'suspended') {
@@ -384,50 +479,16 @@ async function authenticateAdmin(req: Request, res: Response, next: NextFunction
     return next();
   }
 
-  // Try verifying with Firebase Identity Toolkit if it is a real Google/Firebase JWT
-  try {
-    const lookupRes = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseConfig.apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: token }),
-      }
-    );
-
-    if (lookupRes.ok) {
-      const data = await lookupRes.json();
-      const userRecord = data.users?.[0];
-      if (userRecord && userRecord.email) {
-        let adminUser = staffRegistry.get(userRecord.email.toLowerCase());
-        // Auto-bootstrap runtime user as SUPER_ADMIN
-        if (!adminUser && userRecord.email.toLowerCase() === 'raghavalarence300@gmail.com') {
-          adminUser = {
-            uid: userRecord.localId || 'superadmin_raghava',
-            email: userRecord.email,
-            name: userRecord.displayName || 'Raghava (Super Admin)',
-            role: 'SUPER_ADMIN',
-            status: 'active',
-            createdAt: Date.now(),
-            lastLogin: Date.now(),
-            createdBy: 'AUTO_BOOTSTRAP',
-          };
-          staffRegistry.set(userRecord.email.toLowerCase(), adminUser);
-        }
-
-        if (adminUser) {
-          if (adminUser.status === 'suspended') {
-            return res.status(403).json({ error: 'Administrator account has been suspended' });
-          }
-          activeTokens.set(token, adminUser);
-          (req as any).admin = adminUser;
-          (req as any).adminPermissions = ROLE_PERMISSIONS[adminUser.role];
-          return next();
-        }
-      }
+  // 2. Try verifying as a direct Firebase ID token
+  const verifiedUser = await resolveAdminUserFromIdToken(token);
+  if (verifiedUser) {
+    if (verifiedUser.status === 'suspended') {
+      return res.status(403).json({ error: 'Administrator account has been suspended' });
     }
-  } catch (err) {
-    console.warn('Firebase token verification error:', err);
+    activeTokens.set(token, verifiedUser);
+    (req as any).admin = verifiedUser;
+    (req as any).adminPermissions = ROLE_PERMISSIONS[verifiedUser.role];
+    return next();
   }
 
   return res.status(401).json({ error: 'Unauthorized: Invalid administrator credentials or role' });
@@ -451,6 +512,21 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
+  // Global CORS and OPTIONS preflight middleware for Android Chrome, iOS, and desktop browsers
+  app.use((req, res, next) => {
+    const origin = req.headers.origin || '*';
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(204).end();
+    }
+    next();
+  });
+
   app.use(express.json());
 
   // Log all admin requests
@@ -458,118 +534,145 @@ async function startServer() {
     next();
   });
 
-  // ==========================================
-  // AUTHENTICATION ENDPOINTS
-  // ==========================================
+  // Reusable login dispatcher supporting both POST and GET
+  async function handleAdminLogin(credentials: { idToken?: string; demoRole?: AdminRole; email?: string }, req: Request, res: Response) {
+    const { idToken, demoRole, email } = credentials;
+    let adminUser: AdminUser | null = null;
 
-  // Admin login endpoint
-  app.post('/api/admin/auth/login', async (req, res) => {
-    try {
-      const { idToken, demoRole, email } = req.body;
-
-      let adminUser: AdminUser | undefined;
-
-      // Case 1: Firebase ID Token provided (Google Sign-In)
-      if (idToken) {
-        try {
-          const lookupRes = await fetch(
-            `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseConfig.apiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ idToken }),
-            }
-          );
-          if (lookupRes.ok) {
-            const data = await lookupRes.json();
-            const userRecord = data.users?.[0];
-            if (userRecord && userRecord.email) {
-              const userEmail = userRecord.email.toLowerCase();
-              adminUser = staffRegistry.get(userEmail);
-              if (!adminUser && userEmail === 'raghavalarence300@gmail.com') {
-                adminUser = {
-                  uid: userRecord.localId || 'superadmin_raghava',
-                  email: userRecord.email,
-                  name: userRecord.displayName || 'Raghava (Super Admin)',
-                  role: 'SUPER_ADMIN',
-                  status: 'active',
-                  createdAt: Date.now(),
-                  lastLogin: Date.now(),
-                  createdBy: 'AUTO_BOOTSTRAP',
-                };
-                staffRegistry.set(userEmail, adminUser);
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Firebase token lookup failed:', e);
-        }
-      }
-
-      // Case 2: Direct email / demo role switch for testing all 5 roles
-      if (!adminUser && email) {
-        adminUser = staffRegistry.get(email.toLowerCase());
-      }
-
-      if (!adminUser && demoRole) {
-        const found = Array.from(staffRegistry.values()).find((u) => u.role === demoRole && u.status === 'active');
-        if (found) adminUser = found;
-      }
-
+    if (idToken) {
+      adminUser = await resolveAdminUserFromIdToken(idToken);
       if (!adminUser) {
         return res.status(401).json({
-          error: 'Access Denied: You are not authorized as a Tickle-Tac administrator. Contact a Super Admin.',
+          error: 'Access Denied: This Google account is not authorized as a Tickle-Tac administrator. Contact a Super Admin.',
         });
       }
+    } else if (email) {
+      adminUser = staffRegistry.get(email.toLowerCase()) || null;
+    } else if (demoRole) {
+      const found = Array.from(staffRegistry.values()).find((u) => u.role === demoRole && u.status === 'active');
+      if (found) adminUser = found;
+    }
 
-      if (adminUser.status === 'suspended') {
-        return res.status(403).json({ error: 'This administrator account has been suspended.' });
+    if (!adminUser) {
+      return res.status(401).json({
+        error: 'Access Denied: You are not authorized as a Tickle-Tac administrator. Contact a Super Admin.',
+      });
+    }
+
+    if (adminUser.status === 'suspended') {
+      return res.status(403).json({ error: 'This administrator account has been suspended.' });
+    }
+
+    // Issue session token
+    const sessionToken = 'tt_adm_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    adminUser.lastLogin = Date.now();
+    activeTokens.set(sessionToken, adminUser);
+
+    // Record audit log
+    auditLogsStore.unshift({
+      id: 'LOG-' + Date.now(),
+      category: 'AUTH',
+      action: 'ADMIN_LOGIN_SUCCESS',
+      adminUid: adminUser.uid,
+      adminEmail: adminUser.email,
+      adminRole: adminUser.role,
+      details: { method: idToken ? 'Firebase OAuth' : 'Staff Switcher', timestamp: Date.now() },
+      timestamp: Date.now(),
+    });
+
+    return res.json({
+      token: sessionToken,
+      user: adminUser,
+      permissions: ROLE_PERMISSIONS[adminUser.role],
+    });
+  }
+
+  // ==========================================
+  // AUTHENTICATION ENDPOINTS (GET + POST + OPTIONS)
+  // ==========================================
+
+  // Admin login endpoint — supports both POST and GET to prevent 405 on mobile redirects
+  app.route('/api/admin/auth/login')
+    .options((req, res) => res.sendStatus(204))
+    .post(async (req, res) => {
+      try {
+        const body = req.body || {};
+        return await handleAdminLogin(body, req, res);
+      } catch (err: any) {
+        console.error('Login error:', err);
+        return res.status(500).json({ error: err.message || 'Server error during login' });
       }
-
-      // Issue session token
-      const sessionToken = 'tt_adm_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-      adminUser.lastLogin = Date.now();
-      activeTokens.set(sessionToken, adminUser);
-
-      // Record audit log
-      auditLogsStore.unshift({
-        id: 'LOG-' + Date.now(),
-        category: 'AUTH',
-        action: 'ADMIN_LOGIN_SUCCESS',
-        adminUid: adminUser.uid,
-        adminEmail: adminUser.email,
-        adminRole: adminUser.role,
-        details: { method: idToken ? 'Firebase OAuth' : 'Staff Switcher', timestamp: Date.now() },
-        timestamp: Date.now(),
+    })
+    .get(async (req, res) => {
+      try {
+        const idToken = (req.query.idToken as string) || undefined;
+        const demoRole = (req.query.demoRole as AdminRole) || undefined;
+        const email = (req.query.email as string) || undefined;
+        if (!idToken && !demoRole && !email) {
+          return res.json({
+            status: 'online',
+            service: 'Tickle-Tac Admin Authentication Endpoint',
+            methods: ['POST', 'GET', 'OPTIONS'],
+          });
+        }
+        return await handleAdminLogin({ idToken, demoRole, email }, req, res);
+      } catch (err: any) {
+        console.error('Login GET error:', err);
+        return res.status(500).json({ error: err.message || 'Server error during login' });
+      }
+    })
+    .all((req, res) => {
+      res.setHeader('Allow', 'GET, POST, OPTIONS');
+      res.status(405).json({
+        error: `HTTP 405: Method ${req.method} Not Allowed on /api/admin/auth/login. Supported methods: GET, POST, OPTIONS.`,
       });
+    });
 
-      return res.json({
-        token: sessionToken,
-        user: adminUser,
-        permissions: ROLE_PERMISSIONS[adminUser.role],
+  // Verify current session — supports both GET and POST
+  app.route('/api/admin/auth/me')
+    .options((req, res) => res.sendStatus(204))
+    .get(authenticateAdmin, (req, res) => {
+      const admin = (req as any).admin;
+      const permissions = (req as any).adminPermissions;
+      res.json({ user: admin, permissions });
+    })
+    .post(authenticateAdmin, (req, res) => {
+      const admin = (req as any).admin;
+      const permissions = (req as any).adminPermissions;
+      res.json({ user: admin, permissions });
+    })
+    .all((req, res) => {
+      res.setHeader('Allow', 'GET, POST, OPTIONS');
+      res.status(405).json({
+        error: `HTTP 405: Method ${req.method} Not Allowed on /api/admin/auth/me. Supported methods: GET, POST, OPTIONS.`,
       });
-    } catch (err: any) {
-      console.error('Login error:', err);
-      return res.status(500).json({ error: err.message || 'Server error during login' });
-    }
-  });
+    });
 
-  // Verify current session
-  app.get('/api/admin/auth/me', authenticateAdmin, (req, res) => {
-    const admin = (req as any).admin;
-    const permissions = (req as any).adminPermissions;
-    res.json({ user: admin, permissions });
-  });
-
-  // Logout
-  app.post('/api/admin/auth/logout', authenticateAdmin, (req, res) => {
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-      const token = authHeader.split('Bearer ')[1]?.trim();
-      if (token) activeTokens.delete(token);
-    }
-    res.json({ success: true, message: 'Logged out successfully' });
-  });
+  // Logout — supports both POST and GET
+  app.route('/api/admin/auth/logout')
+    .options((req, res) => res.sendStatus(204))
+    .post(authenticateAdmin, (req, res) => {
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        const token = authHeader.split('Bearer ')[1]?.trim();
+        if (token) activeTokens.delete(token);
+      }
+      res.json({ success: true, message: 'Logged out successfully' });
+    })
+    .get(authenticateAdmin, (req, res) => {
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        const token = authHeader.split('Bearer ')[1]?.trim();
+        if (token) activeTokens.delete(token);
+      }
+      res.json({ success: true, message: 'Logged out successfully' });
+    })
+    .all((req, res) => {
+      res.setHeader('Allow', 'GET, POST, OPTIONS');
+      res.status(405).json({
+        error: `HTTP 405: Method ${req.method} Not Allowed on /api/admin/auth/logout. Supported methods: GET, POST, OPTIONS.`,
+      });
+    });
 
   // ==========================================
   // DASHBOARD & ANALYTICS ENDPOINTS
@@ -1371,6 +1474,13 @@ async function startServer() {
     });
 
     res.json({ success: true, message: `Access revoked for ${targetEmail}` });
+  });
+
+  // Catch-all for unknown /api/admin/* routes so they return JSON 404 instead of falling through to HTML
+  app.all('/api/admin/*', (req, res) => {
+    res.status(404).json({
+      error: `Admin API endpoint ${req.method} ${req.path} not found. Please check method and route.`,
+    });
   });
 
   // ==========================================

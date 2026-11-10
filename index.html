@@ -9,7 +9,7 @@
   <meta property="og:description" content="Tickle-Tac: 15x15 five-in-a-row multiplayer game with private online rooms, real-time Firestore synchronization, Google permanent accounts, and cloud save data sync." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@500&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" />
   <style>
     :root {
       color-scheme: light;
@@ -139,48 +139,60 @@
       #shop .buybar { min-height: 46px; }
     }
 
-    /* Layout: Dark navy gaming pocket game */
+    /* Layout: Tactical Military Esports Gaming Theme */
     :root {
-      --bg: #0b1424;
-      --grid: #16243d;
-      --fg: #eef4fc;
-      --muted: #889bb6;
-      --x: #4f8fff;
-      --o: #ff5a43;
-      --surface: #132038;
-      --surface-hover: #192a4a;
-      --line: #263857;
-      --cell-line: #33486c;
-      --warn: #f59e0b;
-      --gold: #fbbf24;
+      --bg: #0c1017;
+      --bg-darker: #070a10;
+      --grid: rgba(0, 210, 255, 0.06);
+      --fg: #f1f5f9;
+      --muted: #8496ab;
+      --x: #00d2ff; /* Electric blue tactical neon */
+      --o: #ff4747; /* Tactical danger red */
+      --surface: #141d2c;
+      --surface-hover: #1b263b;
+      --surface-metal: linear-gradient(180deg, #1c283c 0%, #111a28 100%);
+      --line: #223249;
+      --cell-line: #1c2a3f;
+      --orange: #ff6b00; /* Tactical orange */
+      --orange-hover: #ff7d1a;
+      --orange-glow: rgba(255, 107, 0, 0.45);
+      --warn: #ff8800;
+      --gold: #f59e0b; /* Metallic gold */
+      --gold-bright: #fbbf24;
       --online: #10b981;
-      --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-      --font-body: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      --font-display: "Barlow Condensed", "Avenir Next", "Impact", system-ui, sans-serif;
+      --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      --bga: #08101f;
-      --bgb: #0f1a2e;
-      --bgc: #1b1633;
-      --shape: 0.16;
+      --bga: #090d15;
+      --bgb: #0e1624;
+      --bgc: #161226;
+      --shape: 0.12;
       color-scheme: dark;
     }
     :root[data-theme="light"] {
-      --bg: #edf2f8;
-      --grid: #d3dfee;
-      --fg: #101c30;
-      --muted: #576a84;
-      --x: #1f57e7;
-      --o: #e44227;
+      --bg: #e9eff7;
+      --bg-darker: #dce5f0;
+      --grid: rgba(14, 28, 48, 0.08);
+      --fg: #0d1522;
+      --muted: #50647c;
+      --x: #0077cc;
+      --o: #e03232;
       --surface: #ffffff;
-      --surface-hover: #f7fafc;
-      --line: #142033;
-      --cell-line: #a9bad0;
-      --warn: #b45309;
+      --surface-hover: #f1f6fb;
+      --surface-metal: linear-gradient(180deg, #ffffff 0%, #edf3fa 100%);
+      --line: #c4d4e6;
+      --cell-line: #b2c6dc;
+      --orange: #e65c00;
+      --orange-hover: #ff6b00;
+      --orange-glow: rgba(230, 92, 0, 0.35);
+      --warn: #d97706;
       --gold: #d97706;
+      --gold-bright: #b45309;
       --online: #059669;
-      --bga: #eaf0fa;
-      --bgb: #f1edfa;
-      --bgc: #faede6;
-      --shape: 0.10;
+      --bga: #e5edf7;
+      --bgb: #ebf0fa;
+      --bgc: #f5eeea;
+      --shape: 0.08;
       color-scheme: light;
     }
 
@@ -190,10 +202,10 @@
       background-image:
         linear-gradient(var(--grid) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-      background-size: 24px 24px;
+      background-size: 28px 28px;
       color: var(--fg);
       font-family: var(--font-body);
-      font-size: 16px;
+      font-size: 15px;
       padding-block: 16px;
       padding-left: max(14px, env(safe-area-inset-left, 0px));
       padding-right: max(14px, env(safe-area-inset-right, 0px));
@@ -205,7 +217,7 @@
     }
     .app {
       width: 100%;
-      max-width: 620px;
+      max-width: 760px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -238,23 +250,44 @@
       gap: 3px;
       min-width: 0;
     }
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tactical-insignia {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--x) 0%, #0077b6 100%);
+      color: #041019;
+      font-size: 1.25rem;
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.45);
+      flex-shrink: 0;
+      user-select: none;
+    }
     h1 {
       margin: 0;
       font-family: var(--font-display);
-      font-weight: 800;
+      font-weight: 900;
       font-size: 2.5rem;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
+      line-height: 1;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       text-wrap: balance;
     }
-    h1 .x { color: var(--x); }
-    h1 .o { color: var(--o); }
-    h2 { margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
+    h1 .x { color: var(--x); text-shadow: 0 0 14px rgba(0, 210, 255, 0.5); }
+    h1 .o { color: var(--o); text-shadow: 0 0 14px rgba(255, 71, 71, 0.5); }
+    h1 .hyphen { color: var(--muted); opacity: 0.7; }
+    h2 { margin: 0; font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; }
     .sub {
       margin: 0;
       font-family: var(--font-mono);
-      font-size: 0.74rem;
-      letter-spacing: 0.05em;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--muted);
       line-height: 1.3;
@@ -271,6 +304,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
 
     .account-btn {
@@ -304,39 +338,58 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 6px;
       height: 34px;
       min-height: 34px;
-      padding: 0 11px;
+      padding: 0 12px;
       border: 1.5px solid var(--line);
-      border-radius: 999px;
-      background: var(--surface);
-      box-shadow: 0 2px 0 var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #1b263b 0%, #121c2b 100%);
+      box-shadow: 0 2px 0 #090e16;
       font-weight: 700;
       cursor: pointer;
       color: var(--fg);
       white-space: nowrap;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s, border-color 0.12s;
       box-sizing: border-box;
     }
-    .wallet:hover { background: color-mix(in srgb, var(--fg) 8%, var(--surface)); }
-    .wallet:active { transform: translateY(2px); box-shadow: 0 0 0 var(--line); }
-    .wallet > span:first-child { font-size: 0.92rem; line-height: 1; display: inline-flex; align-items: center; animation: coin 2.6s linear infinite; }
-    .wallet b { font-family: var(--font-mono); font-size: 0.92rem; color: var(--gold); font-variant-numeric: tabular-nums; font-weight: 800; line-height: 1; }
-    .wallet .lab { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .wallet:hover { background: #22324d; border-color: color-mix(in srgb, var(--x) 40%, var(--line)); }
+    .wallet:active { transform: translateY(2px); box-shadow: 0 0 0 #090e16; }
+    .wallet > span:first-child { font-size: 0.95rem; line-height: 1; display: inline-flex; align-items: center; }
+    .wallet b { font-family: var(--font-mono); font-size: 0.9rem; color: var(--gold-bright); font-variant-numeric: tabular-nums; font-weight: 800; line-height: 1; }
+    .wallet .lab { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .wallet.diamond-wallet {
+      border-color: rgba(0, 210, 255, 0.45);
+      background: linear-gradient(180deg, #13243a 0%, #0d1929 100%);
+    }
+    .wallet.diamond-wallet b {
+      color: #38bdf8 !important;
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+    }
+    .wallet.diamond-wallet .lab {
+      color: #7dd3fc;
+    }
+    .wallet.admin-tag {
+      border-color: rgba(0, 210, 255, 0.35);
+      background: color-mix(in srgb, var(--x) 12%, var(--surface));
+    }
+    .wallet.admin-tag .lab {
+      color: var(--x) !important;
+      font-weight: 800;
+    }
     .wallet.bump { animation: bump 0.6s ease; }
 
     /* Compact Theme Switcher Segment */
     .seg.theme {
       display: inline-flex;
       align-items: center;
-      background: var(--bg);
+      background: #090e16;
       border: 1.5px solid var(--line);
-      border-radius: 999px;
+      border-radius: 8px;
       padding: 2px;
-      box-shadow: 0 2px 0 var(--line);
+      box-shadow: 0 2px 0 #05080c;
       gap: 2px;
       height: 34px;
       box-sizing: border-box;
@@ -346,9 +399,10 @@
       height: 28px;
       min-height: 28px;
       padding: 0 9px;
+      font-family: var(--font-mono);
       font-size: 0.72rem;
       font-weight: 700;
-      border-radius: 999px;
+      border-radius: 6px;
       border: none;
       background: transparent;
       color: var(--muted);
@@ -364,54 +418,1021 @@
     }
     .seg.theme button:hover:not([aria-pressed="true"]) {
       color: var(--fg);
-      background: color-mix(in srgb, var(--fg) 8%, transparent);
+      background: rgba(255, 255, 255, 0.08);
     }
     .seg.theme button[aria-pressed="true"] {
-      background: var(--fg);
-      color: var(--bg);
+      background: var(--surface-hover);
+      color: var(--x);
       font-weight: 800;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(0, 210, 255, 0.4);
     }
 
+    /* 3D Metallic Cards & Panels */
     .card {
-      background: var(--surface);
-      border: 2px solid var(--line);
+      background: linear-gradient(180deg, #182335 0%, #111a28 100%);
+      border: 1.5px solid var(--line);
       border-radius: 14px;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      box-shadow: 0 4px 0 #090e16, 0 12px 24px rgba(0, 0, 0, 0.35);
+      position: relative;
     }
-    .hint { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.4; }
-    .warn { margin: 0; color: var(--warn); font-size: 0.9rem; line-height: 1.4; font-weight: 500; }
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12px;
+      right: 12px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+      pointer-events: none;
+    }
+    .hint { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.4; }
+    .warn { margin: 0; color: var(--warn); font-size: 0.88rem; line-height: 1.4; font-weight: 600; }
+
+    /* Tactical Hero Banner & High-Impact Play Now CTA */
+    .tactical-hero-banner {
+      position: relative;
+      border-radius: 16px;
+      border: 1.5px solid var(--line);
+      overflow: hidden;
+      box-shadow: 0 6px 0 #090e16, 0 18px 36px rgba(0, 0, 0, 0.55);
+      background: #090e16;
+      margin-bottom: 2px;
+    }
+    .tactical-hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center 30%;
+      filter: brightness(0.68) contrast(1.15);
+      transform: scale(1.02);
+      transition: transform 0.6s ease;
+    }
+    .tactical-hero-banner:hover .tactical-hero-bg {
+      transform: scale(1.05);
+    }
+    .tactical-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(12, 16, 23, 0.35) 0%, rgba(12, 16, 23, 0.95) 100%),
+        radial-gradient(circle at 85% 15%, rgba(0, 210, 255, 0.22), transparent 45%),
+        radial-gradient(circle at 15% 85%, rgba(255, 107, 0, 0.18), transparent 45%);
+    }
+    .tactical-hero-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px 22px 22px;
+    }
+    .tactical-badge-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .tactical-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: rgba(0, 210, 255, 0.15);
+      border: 1px solid rgba(0, 210, 255, 0.45);
+      color: var(--x);
+    }
+    .tactical-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--x);
+      box-shadow: 0 0 8px var(--x);
+      animation: pulse-dot 1.2s infinite alternate;
+    }
+    @keyframes pulse-dot {
+      from { opacity: 0.6; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1.2); }
+    }
+    .tactical-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .tactical-hero-headline {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .tactical-hero-title {
+      font-family: var(--font-display);
+      font-size: 2.3rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin: 0;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+    .tactical-hero-sub {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      line-height: 1.45;
+      max-width: 520px;
+    }
+    .tactical-cta-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .tactical-play-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      min-height: 58px;
+      padding: 10px 24px;
+      border-radius: 12px;
+      border: 2px solid #ff851a;
+      background: linear-gradient(180deg, #ff851a 0%, #ff5500 50%, #d44000 100%);
+      box-shadow: 0 6px 0 #8f2b00, 0 10px 24px rgba(255, 107, 0, 0.45);
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overflow: hidden;
+      transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tactical-play-btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transform: skewX(-25deg);
+      animation: sweep-glow 3.5s infinite;
+    }
+    @keyframes sweep-glow {
+      0%, 70% { left: -100%; }
+      100% { left: 160%; }
+    }
+    .tactical-play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #8f2b00, 0 14px 30px rgba(255, 107, 0, 0.6);
+      border-color: #ffa04d;
+    }
+    .tactical-play-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #8f2b00, 0 4px 10px rgba(255, 107, 0, 0.3);
+    }
+    .tactical-play-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      line-height: 1;
+      padding-left: 3px;
+    }
+    .tactical-play-labels {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+      min-width: 0;
+      flex: 1;
+    }
+    .tactical-play-main {
+      font-family: var(--font-display);
+      font-size: 1.65rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      text-transform: uppercase;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .tactical-play-sub {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.88);
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Section B: High-Priority Online Multiplayer Grid */
+    .lobby-multiplayer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      width: 100%;
+    }
+    @media (min-width: 600px) {
+      .lobby-multiplayer-grid {
+        grid-template-columns: 1fr 1fr;
+        align-items: stretch;
+      }
+    }
+    .qm-card,
+    .private-room-card {
+      background: linear-gradient(180deg, #151f2f 0%, #0e1622 100%);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 4px 0 #080c14;
+    }
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-hero-icon {
+      font-size: 1.6rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.4));
+    }
+    .qm-card-title {
+      font-family: var(--font-display);
+      font-size: 1.28rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #fff;
+      margin: 0;
+      line-height: 1.1;
+    }
+    .qm-card-desc {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin: 0;
+    }
+    .qm-btn-hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 52px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 2px solid #ffa04d;
+      background: linear-gradient(180deg, #ff851a 0%, #ff5500 50%, #d44000 100%);
+      box-shadow: 0 5px 0 #8f2b00, 0 8px 18px rgba(255, 107, 0, 0.45);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .qm-btn-hero:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 #8f2b00, 0 12px 24px rgba(255, 107, 0, 0.6);
+    }
+    .qm-btn-hero:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #8f2b00;
+    }
+    .qm-btn-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+    .qm-status-box {
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: fadeIn 0.2s ease;
+    }
+    .qm-status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--x);
+      font-weight: 700;
+    }
+    .qm-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0, 210, 255, 0.25);
+      border-top-color: var(--x);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    .qm-cancel-btn {
+      min-height: 36px;
+      font-size: 0.82rem;
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+    }
+    .qm-cancel-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #fff;
+    }
+
+    /* Private Room Dual Actions */
+    .private-room-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .room-action-block {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .room-block-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .private-join-form {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin: 0;
+    }
+    .private-join-form input {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1.5px solid var(--line);
+      background: #141d2c;
+      color: #fff;
+    }
+    .private-join-form input:focus {
+      border-color: var(--x);
+      outline: none;
+      box-shadow: 0 0 8px rgba(0, 210, 255, 0.35);
+    }
+    .private-join-form .btn {
+      flex: 0 0 auto;
+      min-height: 40px;
+      padding: 0 16px;
+      font-size: 0.95rem;
+    }
+
+    /* Section C: Unified Game Modes Section (No Large Images) */
+    .game-modes-unified-card {
+      background: linear-gradient(180deg, #151f2f 0%, #0e1622 100%);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 4px 0 #080c14;
+    }
+    #mode-seg.seg.tabs.unified-modes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 8px;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+      overflow-x: visible;
+    }
+    @media (max-width: 540px) {
+      #mode-seg.seg.tabs.unified-modes-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+    .game-mode-tile {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      background: linear-gradient(180deg, #141e2e 0%, #0d1521 100%);
+      box-shadow: 0 3px 0 #080c14;
+      padding: 11px 14px;
+      overflow: hidden;
+      cursor: pointer;
+      text-align: left;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+    }
+    .game-mode-tile:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--x) 55%, var(--line));
+      box-shadow: 0 5px 0 #080c14;
+    }
+    .game-mode-tile:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 #080c14;
+    }
+    .game-mode-tile.active,
+    .game-mode-tile[aria-pressed="true"] {
+      border-color: var(--x);
+      background: linear-gradient(180deg, #1a2a40 0%, #101a28 100%);
+      box-shadow: 0 3px 0 #080c14, 0 0 12px rgba(0, 210, 255, 0.28);
+    }
+    .game-mode-tile.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--x);
+      box-shadow: 0 0 8px var(--x);
+    }
+    .mode-tile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .mode-tile-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .mode-tile-icon {
+      font-size: 1.2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .mode-tile-name {
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .game-mode-tile.active .mode-tile-name {
+      color: var(--x);
+    }
+    .mode-tile-tags {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .mode-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .badge-blue { background: rgba(0, 210, 255, 0.2); color: var(--x); border: 1px solid rgba(0, 210, 255, 0.4); }
+    .badge-orange { background: rgba(255, 107, 0, 0.2); color: #ff851a; border: 1px solid rgba(255, 107, 0, 0.4); }
+    .badge-gold { background: rgba(245, 158, 11, 0.2); color: var(--gold-bright); border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-red { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .mode-selected-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--x);
+      color: #041019;
+      box-shadow: 0 0 6px rgba(0, 210, 255, 0.5);
+    }
+    .mode-tile-desc {
+      font-size: 0.77rem;
+      color: #94a3b8;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    /* Embedded Tournament Bracket inside Game Modes */
+    .tournament-embedded-strip {
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 4px;
+    }
+
+    /* Match Calibration Subpanel */
+    .match-calibration-subpanel {
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .game-modes-action-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .secondary-combat-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* Section D: Progression Shortcuts Bar */
+    .progression-shortcuts-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .prog-nav-btn {
+      min-height: 40px;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 8px;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    @media (max-width: 480px) {
+      .progression-shortcuts-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tournament Bracket & Matchup Styles */
+    .tournament-card {
+      background: linear-gradient(180deg, #182335 0%, #0f1624 100%);
+      border: 1.5px solid var(--line);
+      position: relative;
+    }
+    .tour-bracket-strip {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 6px;
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin: 6px 0;
+    }
+    @media (max-width: 540px) {
+      .tour-bracket-strip {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .tour-bracket-arrow {
+        transform: rotate(90deg);
+        text-align: center;
+      }
+    }
+    .tour-bracket-node {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: #141d2c;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .tour-bracket-node.active {
+      border-color: var(--x);
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.35);
+      background: #1a273d;
+    }
+    .tour-bracket-node.won {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .t-node-stage {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .t-node-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+    .t-node-opp {
+      font-size: 0.7rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .tour-bracket-arrow {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 800;
+      user-select: none;
+    }
+    .t-bracket-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .tour-enter-btn {
+      width: 100%;
+    }
+
+    /* In-Game Tournament Matchup Banner */
+    .tournament-matchup-banner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(180deg, #182335 0%, #101824 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 12px;
+      padding: 10px 14px;
+      box-shadow: 0 4px 0 #090e16, 0 0 16px rgba(245, 158, 11, 0.25);
+      margin-bottom: 4px;
+      animation: rise-in 0.3s ease;
+    }
+    .t-matchup-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+    }
+    .t-matchup-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+    }
+    .t-matchup-teams {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .t-team-me { color: var(--x); text-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
+    .t-team-vs { font-size: 0.95rem; color: var(--muted); font-weight: 700; }
+    .t-team-opp { color: var(--o); text-shadow: 0 0 10px rgba(255, 71, 71, 0.5); }
+    .t-matchup-reward {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* Daily Supply & Streak Track */
+    .daily-supply-card {
+      background: linear-gradient(180deg, #182335 0%, #101824 100%);
+    }
+    .daily-streak-track {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin: 8px 0;
+    }
+    @media (max-width: 480px) {
+      .daily-streak-track {
+        gap: 4px;
+      }
+    }
+    .streak-day-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 2px;
+      min-height: 52px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .streak-day-node.claimed {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.15);
+    }
+    .streak-day-node.active {
+      border-color: var(--gold);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.45);
+      background: rgba(245, 158, 11, 0.12);
+      transform: scale(1.04);
+    }
+    .streak-day-label {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .streak-day-reward {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--gold-bright);
+      font-weight: 800;
+    }
+    .streak-day-check {
+      font-size: 0.75rem;
+    }
+
+    /* Daily Missions in Lobby */
+    .lobby-missions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .lobby-mission-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+    }
+    .mission-progress-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #141d2c;
+      color: var(--x);
+      border: 1px solid var(--line);
+    }
+    .mission-progress-badge.done {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border-color: #10b981;
+    }
+
+    /* Board Laser Beam Winning Animation */
+    .laser-beam-aura {
+      animation: laser-pulse 1.2s infinite alternate ease-in-out;
+    }
+    .laser-beam-core {
+      stroke-dasharray: 8 4;
+      animation: laser-crawl 0.8s linear infinite;
+    }
+    @keyframes laser-pulse {
+      0% { opacity: 0.35; stroke-width: 10px; }
+      100% { opacity: 0.85; stroke-width: 16px; }
+    }
+    @keyframes laser-crawl {
+      to { stroke-dashoffset: -24; }
+    }
+
+    /* Marketplace Rarity Badges */
+    .item.rarity-common { border-color: #33486c; }
+    .item.rarity-rare { border-color: rgba(0, 210, 255, 0.5); box-shadow: 0 0 6px rgba(0, 210, 255, 0.2); }
+    .item.rarity-epic { border-color: rgba(168, 85, 247, 0.5); box-shadow: 0 0 8px rgba(168, 85, 247, 0.25); }
+    .item.rarity-legendary { border-color: rgba(245, 158, 11, 0.7); box-shadow: 0 0 10px rgba(245, 158, 11, 0.35); }
+
+    /* Competitive Gaming Profile Card */
+    .profile-hero-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: linear-gradient(180deg, #182335 0%, #101824 100%);
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 0 #090e16;
+    }
+    .profile-hero-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .profile-hero-av {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      background: #090e16;
+      border: 2px solid var(--x);
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .profile-hero-meta {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .profile-hero-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .profile-hero-name {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      color: #fff;
+      line-height: 1;
+    }
+    .profile-rank-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.1) 100%);
+      border: 1px solid var(--gold);
+      color: var(--gold-bright);
+    }
+    .profile-id-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+    }
+    @media (max-width: 480px) {
+      .profile-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .p-stat-card {
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .p-stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .p-stat-val {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 900;
+      line-height: 1;
+      color: #fff;
+    }
 
     .row { display: flex; gap: 10px; }
     .btn {
       flex: 1;
       min-width: 0;
       min-height: 48px;
-      border-radius: 12px;
-      border: 2px solid var(--line);
-      background: var(--surface);
+      border-radius: 10px;
+      border: 1.5px solid var(--line);
+      background: linear-gradient(180deg, #1c283c 0%, #121c2b 100%);
+      font-family: var(--font-display);
       font-weight: 800;
-      font-size: 1rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
       padding: 0 14px;
+      box-shadow: 0 4px 0 #090e16;
+      color: var(--fg);
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s, border-color 0.12s;
     }
-    .btn.primary { background: var(--fg); color: var(--bg); }
-    .btn:not(:disabled):active { transform: translateY(1px); }
+    .btn:hover:not(:disabled) {
+      background: #23324b;
+      border-color: color-mix(in srgb, var(--x) 50%, var(--line));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #090e16;
+    }
+    .btn.primary {
+      background: linear-gradient(180deg, #ff851a 0%, #ff5500 50%, #d44000 100%);
+      border-color: #ff851a;
+      box-shadow: 0 4px 0 #8f2b00, 0 6px 16px rgba(255, 107, 0, 0.35);
+      color: #fff;
+    }
+    .btn.primary:hover:not(:disabled) {
+      background: linear-gradient(180deg, #ff9433 0%, #ff661a 50%, #e64700 100%);
+      box-shadow: 0 6px 0 #8f2b00, 0 8px 20px rgba(255, 107, 0, 0.5);
+    }
+    .btn:not(:disabled):active { transform: translateY(2px); box-shadow: 0 1px 0 #090e16; }
+    .btn.primary:not(:disabled):active { transform: translateY(2px); box-shadow: 0 1px 0 #8f2b00; }
     .join { display: flex; gap: 10px; }
     .join input {
       flex: 1;
       min-width: 0;
       min-height: 48px;
-      border: 2px solid var(--line);
-      border-radius: 12px;
-      background: var(--bg);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      background: #090e16;
       padding: 0 14px;
       font-family: var(--font-mono);
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       letter-spacing: 0.25em;
       text-transform: uppercase;
+      color: var(--fg);
     }
     .join .btn { flex: 0 0 auto; }
     .linkish {
@@ -427,12 +1448,22 @@
 
     .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
     .back {
-      min-height: 40px;
+      min-height: 38px;
       padding: 0 14px;
-      border-radius: 999px;
-      border: 2px solid var(--line);
-      background: var(--surface);
+      border-radius: 8px;
+      border: 1.5px solid var(--line);
+      background: linear-gradient(180deg, #1c283c 0%, #121c2b 100%);
+      font-family: var(--font-display);
       font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+      box-shadow: 0 3px 0 #090e16;
+      color: var(--fg);
+    }
+    .back:hover {
+      background: #23324b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #090e16;
     }
     .chip {
       display: flex;
@@ -1962,6 +2993,175 @@
       }
     }
 
+    /* =========================================================
+       Mobile-First Bottom Navigation Bar & Android Ergonomics
+       ========================================================= */
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      background: rgba(12, 17, 28, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1.5px solid var(--line);
+      height: calc(56px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.6);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .bnav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 56px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s ease, transform 0.1s ease;
+      position: relative;
+      padding: 0;
+      margin: 0;
+    }
+    .bnav-item .bnav-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .bnav-item .bnav-label {
+      letter-spacing: 0.04em;
+      line-height: 1;
+      text-transform: uppercase;
+      font-size: 0.62rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+    .bnav-item:active {
+      transform: scale(0.92);
+    }
+    .bnav-item.active,
+    .bnav-item[aria-selected="true"] {
+      color: var(--x);
+    }
+    .bnav-item.active .bnav-icon {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.7));
+    }
+    .bnav-item.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 18%;
+      right: 18%;
+      height: 3px;
+      background: var(--x);
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 10px var(--x);
+    }
+    .app {
+      padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    }
+    .app.in-game {
+      padding-bottom: 16px;
+    }
+
+    /* Expandable Match Calibration Details Accordion */
+    .match-calibration-details {
+      background: #090e16;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 4px;
+      transition: border-color 0.15s ease;
+    }
+    .match-calibration-details[open] {
+      border-color: rgba(0, 210, 255, 0.45);
+    }
+    .match-calibration-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      list-style: none;
+      background: rgba(255, 255, 255, 0.02);
+      transition: background 0.15s ease;
+    }
+    .match-calibration-summary:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .match-calibration-summary::-webkit-details-marker {
+      display: none;
+    }
+    .calib-summary-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .calib-gear-icon {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+    .calib-title {
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #fff;
+    }
+    .calib-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--x);
+      background: rgba(0, 210, 255, 0.12);
+      border: 1px solid rgba(0, 210, 255, 0.35);
+      border-radius: 4px;
+      padding: 2px 8px;
+      letter-spacing: 0.04em;
+    }
+    .match-calibration-details[open] .match-calibration-subpanel {
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      margin-top: 0;
+      background: transparent;
+    }
+
+    /* Mobile Touch & Game Board Viewport Fitting */
+    @media (max-width: 600px) {
+      .board-scroll {
+        max-height: min(58vh, 58dvh);
+        touch-action: pan-x pan-y;
+      }
+      .game-actions-row {
+        gap: 6px;
+      }
+      .game-actions-row .btn {
+        min-height: 46px;
+        font-size: 0.95rem;
+        padding: 0 8px;
+      }
+      .tactical-play-btn {
+        min-height: 54px;
+      }
+      .tactical-play-main {
+        font-size: 1.45rem;
+      }
+    }
+
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -2044,14 +3244,20 @@
   <div class="app" id="app" hidden>
     <header>
       <div class="titles">
-        <h1><span class="x">Tickle</span>-<span class="o">Tac</span></h1>
+        <div class="brand-lockup">
+          <span class="tactical-insignia" aria-hidden="true">⚡</span>
+          <h1><span class="x">TICKLE</span><span class="hyphen">-</span><span class="o">TAC</span></h1>
+        </div>
         <p class="sub" id="sub">15 &times; 15 board &middot; five in a row wins</p>
       </div>
       <div class="hright">
         <div class="header-actions">
-          <a href="/admin" class="wallet" style="text-decoration:none;font-size:0.75rem;padding:0 9px;border-color:var(--line);background:color-mix(in srgb, var(--x) 12%, var(--surface));color:var(--fg);" title="Open Tickle-Tac Administrator Panel">
-            <span aria-hidden="true">🛡️</span><span class="lab" style="color:var(--x);font-weight:800;">Admin</span>
+          <a href="/admin" class="wallet admin-tag" style="text-decoration:none;" title="Open Tickle-Tac Administrator Panel">
+            <span aria-hidden="true">🛡️</span><span class="lab">Admin</span>
           </a>
+          <button class="wallet diamond-wallet" id="diamond-wallet-btn" type="button" aria-label="Diamonds balance">
+            <span aria-hidden="true">💎</span><b id="diamonds-count">0</b><span class="lab">Diamonds</span>
+          </button>
           <button class="wallet" id="wallet" type="button" aria-label="Open emoji shop">
             <span aria-hidden="true">🪙</span><b id="pts">0</b><span class="lab">Shop</span>
           </button>
@@ -2065,6 +3271,7 @@
     </header>
 
     <main id="lobby" class="stack">
+      <!-- Section A: Player Profile Area -->
       <section class="card pcard" id="pcard">
         <button class="av" id="p-av" type="button" aria-label="Open profile">🙂</button>
         <div class="pinfo">
@@ -2072,9 +3279,9 @@
             <b id="p-name">Player</b>
             <span class="badge-acc" id="badge-acc">Guest</span>
           </div>
-          <span class="sub" id="p-title"></span>
+          <span class="sub" id="p-title">Rookie</span>
           <div class="xpbar"><i id="p-xp"></i></div>
-          <span class="sub" id="p-lv"></span>
+          <span class="sub" id="p-lv">Level 1 · 0/40 XP</span>
         </div>
         <div class="pside">
           <span class="sub" id="p-online">Connecting…</span>
@@ -2085,120 +3292,232 @@
         </div>
       </section>
 
-      <!-- Section: Online Multiplayer -->
+      <!-- Section B: Main Multiplayer (Highest Priority) -->
       <div class="lobby-section-header">
         <span class="lobby-section-icon">⚔️</span>
-        <h3 class="lobby-section-title">Play Online</h3>
+        <h3 class="lobby-section-title">Online Multiplayer</h3>
+        <span class="lobby-section-badge">Priority Matchmaking</span>
       </div>
+
       <div class="lobby-multiplayer-grid">
-        <section class="card">
+        <!-- Quick Match: Highest Priority -->
+        <section class="card qm-card" id="qm-card">
           <div class="card-head-row">
-            <h2>Quick Match</h2>
-            <span class="card-badge blue">Fast Match</span>
+            <div class="card-title-group">
+              <span class="card-hero-icon">⚡</span>
+              <div>
+                <h2 class="qm-card-title">Quick Match</h2>
+                <span class="card-badge blue">Fast Match</span>
+              </div>
+            </div>
           </div>
-          <p class="hint">Instant matchmaking with players worldwide.</p>
+          <p class="qm-card-desc">Find an opponent and start playing.</p>
           <div class="card-action-bar">
-            <button class="btn primary" id="qm" type="button" disabled>Quick Match</button>
+            <button class="btn primary qm-btn-hero" id="qm" type="button" disabled>
+              <span class="qm-btn-icon">⚡</span> Quick Match
+            </button>
+            <div class="qm-status-box" id="qm-status-box" hidden>
+              <div class="qm-status-indicator">
+                <span class="qm-spinner"></span>
+                <span id="qm-status-text">Searching for opponent…</span>
+              </div>
+              <button class="btn qm-cancel-btn" id="qm-cancel" type="button">Cancel Matchmaking</button>
+            </div>
           </div>
         </section>
 
-        <section class="card">
+        <!-- Private Room: Highest Priority -->
+        <section class="card private-room-card" id="private-room-card">
           <div class="card-head-row">
-            <h2>Private Room</h2>
-            <span class="card-badge gold">Play Friends</span>
+            <div class="card-title-group">
+              <span class="card-hero-icon">🔑</span>
+              <div>
+                <h2 class="qm-card-title">Private Room</h2>
+                <span class="card-badge gold">Play Friends</span>
+              </div>
+            </div>
           </div>
+          <p class="qm-card-desc">Host a match with a private room code or enter a friend's code to join.</p>
+
+          <div class="private-room-actions">
+            <!-- Action 1: Create Room -->
+            <div class="room-action-block">
+              <span class="room-block-label">CREATE ROOM</span>
+              <button class="btn primary" id="create" type="button" disabled>
+                ➕ Create Room
+              </button>
+            </div>
+
+            <!-- Action 2: Join Room -->
+            <div class="room-action-block">
+              <span class="room-block-label">JOIN ROOM</span>
+              <form class="join private-join-form" id="join-form" autocomplete="off">
+                <input id="code-in" type="text" maxlength="6" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="6-CHAR CODE" aria-label="Friend's game code" disabled />
+                <button class="btn" id="join-btn" type="submit" disabled>Join</button>
+              </form>
+            </div>
+          </div>
+
+          <button class="linkish" id="resume" type="button" hidden>Rejoin game <span id="resume-code"></span></button>
           <p class="hint" id="online-hint">Connecting to Firebase online services…</p>
-          <div class="card-action-bar">
-            <button class="btn primary" id="create" type="button" disabled>Create Game</button>
-            <form class="join" id="join-form" autocomplete="off" style="margin-top: 8px;">
-              <input id="code-in" type="text" maxlength="6" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="6-CHAR CODE" aria-label="Friend's game code" disabled />
-              <button class="btn" id="join-btn" type="submit" disabled>Join</button>
-            </form>
-            <button class="linkish" id="resume" type="button" hidden>Rejoin game <span id="resume-code"></span></button>
-            <p class="warn" id="online-msg" role="alert" hidden></p>
-          </div>
+          <p class="warn" id="online-msg" role="alert" hidden></p>
         </section>
       </div>
 
-      <!-- Section: Match Rules & Settings -->
+      <!-- Section C: Game Modes (Unified Single Section) -->
       <div class="lobby-section-header">
-        <span class="lobby-section-icon">⚙️</span>
-        <h3 class="lobby-section-title">Match Rules &amp; Settings</h3>
+        <span class="lobby-section-icon">🎯</span>
+        <h3 class="lobby-section-title">Game Modes</h3>
+        <span class="lobby-section-badge">5 Modes</span>
       </div>
-      <section class="match-rules-card">
-        <div class="setting">
-          <div class="card-head-row">
-            <span class="lab">Game mode</span>
-            <span class="card-badge">Selected Rule</span>
+
+      <section class="card game-modes-unified-card" id="game-modes-section">
+        <div class="card-head-row" style="margin-bottom:6px;">
+          <div>
+            <h2 style="font-size:1.15rem;">Game Modes</h2>
+            <p class="hint" id="mode-hint" style="margin-top:2px;">Standard five-in-a-row rules with tactical move timer.</p>
           </div>
-          <div class="seg tabs" id="mode-seg" role="group" aria-label="Game mode"></div>
-          <p class="hint" id="mode-hint"></p>
+          <span class="card-badge blue">Unified Arena</span>
         </div>
 
-        <div class="rules-selectors-grid">
-          <div class="setting">
-            <span class="lab">Board size</span>
-            <div class="seg" id="size-seg" role="group" aria-label="Board size">
-              <button type="button" data-n="3" aria-pressed="false">3&times;3</button>
-              <button type="button" data-n="4" aria-pressed="false">4&times;4</button>
-              <button type="button" data-n="5" aria-pressed="false">5&times;5</button>
-              <button type="button" data-n="7" aria-pressed="false">7&times;7</button>
-              <button type="button" data-n="15" aria-pressed="true">15&times;15</button>
-            </div>
-            <p class="hint" id="size-hint"></p>
-          </div>
+        <!-- 5 Clean Rectangular Selectable Tiles (No large images) -->
+        <div class="seg tabs unified-modes-grid" id="mode-seg" role="group" aria-label="Game mode"></div>
 
-          <div class="setting">
-            <span class="lab">Move timer</span>
-            <div class="seg" id="timer-seg" role="group" aria-label="Seconds per move">
-              <button type="button" data-t="15" aria-pressed="false">15s</button>
-              <button type="button" data-t="30" aria-pressed="true">30s</button>
-              <button type="button" data-t="60" aria-pressed="false">60s</button>
-              <button type="button" data-t="0" aria-pressed="false">Off</button>
+        <!-- Tournament Bracket (Embedded inside Game Modes when Championship is active) -->
+        <div class="tournament-embedded-strip" id="lobby-tournament-card">
+          <div class="card-head-row" style="margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:1rem;">🏆</span>
+              <b style="font-family:var(--font-display);font-size:1.05rem;color:var(--gold-bright);">Championship Bracket</b>
+              <span class="card-badge gold">Prize: 100 🪙 + 100 XP</span>
             </div>
-            <p class="hint">Passes turn on timeout.</p>
+            <span class="t-bracket-status" id="lobby-tour-status">Quarter-Final</span>
+          </div>
+          <div class="tour-bracket-strip">
+            <div class="tour-bracket-node" id="t-node-1">
+              <span class="t-node-stage">STAGE 1</span>
+              <b class="t-node-title">Quarter-Final</b>
+              <span class="t-node-opp">vs Bolt 🤖</span>
+            </div>
+            <div class="tour-bracket-arrow">➔</div>
+            <div class="tour-bracket-node" id="t-node-2">
+              <span class="t-node-stage">STAGE 2</span>
+              <b class="t-node-title">Semi-Final</b>
+              <span class="t-node-opp">vs Nova 🤖</span>
+            </div>
+            <div class="tour-bracket-arrow">➔</div>
+            <div class="tour-bracket-node" id="t-node-3">
+              <span class="t-node-stage">STAGE 3</span>
+              <b class="t-node-title">Grand Final</b>
+              <span class="t-node-opp">vs Rex 🤖</span>
+            </div>
+          </div>
+          <p class="hint" id="lobby-tour-hint">Defeat all 3 computer rivals in single-elimination matches to claim the trophy.</p>
+          <div class="card-action-bar" style="margin-top:6px;">
+            <button class="btn primary tour-enter-btn" id="lobby-tour-enter-btn" type="button">Enter Tournament</button>
           </div>
         </div>
 
-        <div class="setting">
-          <span class="lab">Computer difficulty</span>
-          <div class="difficulty-pick" id="ai-difficulty">
-            <button type="button" data-ai="easy">Easy</button>
-            <button type="button" data-ai="medium">Medium</button>
-            <button type="button" data-ai="hard">Hard</button>
+        <!-- Match Calibration Subpanel (Compact Expandable for Mobile) -->
+        <details class="match-calibration-details" id="match-calib-details">
+          <summary class="match-calibration-summary">
+            <div class="calib-summary-left">
+              <span class="calib-gear-icon">⚙️</span>
+              <span class="calib-title">Match Settings</span>
+            </div>
+            <span class="calib-badge" id="calib-summary-badge">15×15 · 30s · Medium</span>
+          </summary>
+          <div class="match-calibration-subpanel">
+            <div class="rules-selectors-grid">
+              <div class="setting">
+                <span class="lab">Board size</span>
+                <div class="seg" id="size-seg" role="group" aria-label="Board size">
+                  <button type="button" data-n="3" aria-pressed="false">3&times;3</button>
+                  <button type="button" data-n="4" aria-pressed="false">4&times;4</button>
+                  <button type="button" data-n="5" aria-pressed="false">5&times;5</button>
+                  <button type="button" data-n="7" aria-pressed="false">7&times;7</button>
+                  <button type="button" data-n="15" aria-pressed="true">15&times;15</button>
+                </div>
+                <p class="hint" id="size-hint"></p>
+              </div>
+
+              <div class="setting">
+                <span class="lab">Move timer</span>
+                <div class="seg" id="timer-seg" role="group" aria-label="Seconds per move">
+                  <button type="button" data-t="15" aria-pressed="false">15s</button>
+                  <button type="button" data-t="30" aria-pressed="true">30s</button>
+                  <button type="button" data-t="60" aria-pressed="false">60s</button>
+                  <button type="button" data-t="0" aria-pressed="false">Off</button>
+                </div>
+                <p class="hint">Passes turn on timeout.</p>
+              </div>
+            </div>
+
+            <div class="setting">
+              <span class="lab">Computer difficulty</span>
+              <div class="difficulty-pick" id="ai-difficulty">
+                <button type="button" data-ai="easy">Easy</button>
+                <button type="button" data-ai="medium">Medium</button>
+                <button type="button" data-ai="hard">Hard</button>
+              </div>
+              <p class="hint">Applies to computer matches.</p>
+            </div>
           </div>
-          <p class="hint">Applies to computer matches. Online and local matches are unchanged.</p>
+        </details>
+
+        <!-- Local Combat Execution Actions -->
+        <div class="game-modes-action-row">
+          <button class="tactical-play-btn" id="play-now-deploy" type="button">
+            <span class="tactical-play-icon">▶</span>
+            <span class="tactical-play-labels">
+              <span class="tactical-play-main">DEPLOY NOW</span>
+              <span class="tactical-play-sub" id="play-now-sub">CLASSIC ARENA &bull; 15&times;15</span>
+            </span>
+          </button>
+          <div class="secondary-combat-actions">
+            <button class="btn" id="vs-cpu" type="button">VS Computer</button>
+            <button class="btn" id="vs-local" type="button">Pass &amp; Play</button>
+          </div>
         </div>
       </section>
 
-      <!-- Section: Solo & Local Modes -->
+      <!-- Section D: Progression & Rewards -->
       <div class="lobby-section-header">
-        <span class="lobby-section-icon">🎮</span>
-        <h3 class="lobby-section-title">Solo &amp; Local Modes</h3>
+        <span class="lobby-section-icon">🎁</span>
+        <h3 class="lobby-section-title">Progression &amp; Rewards</h3>
+        <span class="lobby-section-badge">Rewards</span>
       </div>
-      <div class="lobby-offline-grid">
-        <section class="card">
-          <div class="card-head-row">
-            <h2>Play the Computer</h2>
-            <span class="card-badge green">Single Player</span>
-          </div>
-          <p class="hint">Practice solo with smart AI across various board sizes.</p>
-          <div class="card-action-bar">
-            <button class="btn" id="vs-cpu" type="button">Start vs Computer</button>
-          </div>
-        </section>
 
-        <section class="card">
-          <div class="card-head-row">
-            <h2>Pass &amp; Play</h2>
-            <span class="card-badge">Same Device</span>
+      <section class="card daily-supply-card" id="lobby-daily-card">
+        <div class="card-head-row">
+          <div>
+            <h2 style="font-size:1.15rem;">Daily Login Streak</h2>
+            <p class="hint" id="lobby-daily-sub" style="margin-top:2px;">Check in daily for supply drops (up to Day 7 streak).</p>
           </div>
-          <p class="hint">Two players, one phone or screen. Hand over after each move.</p>
-          <div class="card-action-bar">
-            <button class="btn" id="vs-local" type="button">Start on This Device</button>
+          <button class="btn primary" id="lobby-daily-claim-btn" type="button" style="flex:0 0 auto;min-height:38px;padding:0 14px;font-size:0.85rem;">Claim Today</button>
+        </div>
+        <div class="daily-streak-track" id="lobby-streak-track"></div>
+        <div class="lobby-missions-wrap" id="lobby-missions-wrap">
+          <div class="card-head-row" style="margin-top:8px;">
+            <span class="lab">Active Tactical Missions</span>
+            <span class="card-badge blue">+30 XP +10 🪙 each</span>
           </div>
-        </section>
-      </div>
+          <div class="lobby-missions-list" id="lobby-missions-list"></div>
+        </div>
+
+        <!-- Progression Quick Shortcuts -->
+        <div class="progression-shortcuts-bar">
+          <button class="btn prog-nav-btn" id="prog-ranks-btn" type="button">
+            <span>🏆</span> Leaderboard
+          </button>
+          <button class="btn prog-nav-btn" id="prog-shop-btn" type="button">
+            <span>🪙</span> Emoji &amp; Skin Shop
+          </button>
+          <button class="btn prog-nav-btn" id="prog-ach-btn" type="button">
+            <span>🎖️</span> Achievements
+          </button>
+        </div>
+      </section>
     </main>
 
     <section id="game" class="stack" hidden>
@@ -2216,6 +3535,17 @@
       <div class="conn-tag" id="conn-tag" hidden>
         <span class="conn-dot" id="conn-dot"></span>
         <span id="conn-status-text">Connecting…</span>
+      </div>
+
+      <!-- Tournament Matchup HUD in game -->
+      <div class="tournament-matchup-banner" id="tour-matchup-banner" hidden>
+        <div class="t-matchup-badge"><span class="t-matchup-dot"></span> <span id="tour-stage-name">QUARTER-FINAL</span></div>
+        <div class="t-matchup-teams">
+          <span class="t-team-me" id="tour-team-me">YOU</span>
+          <span class="t-team-vs">VS</span>
+          <span class="t-team-opp" id="tour-team-opp">BOLT 🤖</span>
+        </div>
+        <span class="t-matchup-reward">🏆 100 🪙 CHAMPIONSHIP PURSE</span>
       </div>
 
       <div class="score" aria-label="Scoreboard">
@@ -2323,6 +3653,30 @@
 
     <footer class="credit">DESIGNED BY LEGENDARY TECHNOLOGIES</footer>
   </div>
+
+  <!-- Mobile Bottom Navigation Bar (5 Thumb-Friendly Destinations) -->
+  <nav class="mobile-bottom-nav" id="bottom-nav" aria-label="Main Navigation">
+    <button class="bnav-item active" id="bnav-home" type="button" data-nav="home" aria-selected="true">
+      <span class="bnav-icon">🏠</span>
+      <span class="bnav-label">Home</span>
+    </button>
+    <button class="bnav-item" id="bnav-profile" type="button" data-nav="profile" aria-selected="false">
+      <span class="bnav-icon">👤</span>
+      <span class="bnav-label">Profile</span>
+    </button>
+    <button class="bnav-item" id="bnav-shop" type="button" data-nav="shop" aria-selected="false">
+      <span class="bnav-icon">💎</span>
+      <span class="bnav-label">Shop</span>
+    </button>
+    <button class="bnav-item" id="bnav-rewards" type="button" data-nav="rewards" aria-selected="false">
+      <span class="bnav-icon">🎁</span>
+      <span class="bnav-label">Rewards</span>
+    </button>
+    <button class="bnav-item" id="bnav-more" type="button" data-nav="more" aria-selected="false">
+      <span class="bnav-icon">☰</span>
+      <span class="bnav-label">More</span>
+    </button>
+  </nav>
 
   <dialog id="win" aria-labelledby="win-title">
     <div class="dlg win">

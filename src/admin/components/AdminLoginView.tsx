@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { AdminRole } from '../types/admin';
-import { Shield, Lock, UserCheck, AlertTriangle, Key, ExternalLink, Sparkles } from 'lucide-react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { Shield, Lock, UserCheck, AlertTriangle, Key, ExternalLink, Sparkles, Smartphone } from 'lucide-react';
+import { initializeApp, getApps } from 'firebase/app';
+import {
+  getAuth,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider,
+} from 'firebase/auth';
+import firebaseConfig from '../../../firebase-applet-config.json';
 
 const ROLES_INFO: Array<{
   role: AdminRole;
@@ -53,28 +60,81 @@ export const AdminLoginView: React.FC = () => {
   const { loginWithRole, loginWithGoogleToken, error, isLoading, clearError } = useAdminAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [authErrorNotice, setAuthErrorNotice] = useState<string | null>(null);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
 
-  const handleGoogleSignIn = async () => {
+  // Check for Google redirect result on mount (crucial for Android Chrome & iOS Safari redirect flows)
+  useEffect(() => {
+    const app = getApps().find((a) => a.name === 'AdminAuthClient') || initializeApp(firebaseConfig, 'AdminAuthClient');
+    const auth = getAuth(app);
+
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result && result.user) {
+          setGoogleLoading(true);
+          setAuthNotice('Google sign-in verified. Authenticating with Tickle-Tac backend…');
+          try {
+            const idToken = await result.user.getIdToken(true);
+            await loginWithGoogleToken(idToken);
+          } catch (err: any) {
+            console.error('Redirect token verification error:', err);
+            setAuthErrorNotice(err.message || 'Failed to authenticate administrator token from Google redirect');
+          } finally {
+            setGoogleLoading(false);
+          }
+        }
+      })
+      .catch((err: any) => {
+        console.warn('Google redirect result error:', err);
+        if (err.code !== 'auth/null-user') {
+          setAuthErrorNotice(err.message || 'Google sign-in redirect error');
+        }
+      });
+  }, [loginWithGoogleToken]);
+
+  const handleGoogleSignIn = async (forceRedirect: boolean = false) => {
     setGoogleLoading(true);
     setAuthErrorNotice(null);
+    setAuthNotice(null);
     clearError();
+
     try {
-      const cfg = {
-        apiKey: 'AIzaSyA2pYtJd7dCnpkjpwSknvKWcG7uFrC2Mts',
-        authDomain: 'project-r-64a0b.firebaseapp.com',
-        projectId: 'project-r-64a0b',
-      };
-      const app = initializeApp(cfg, 'AdminAuthClient');
+      const app = getApps().find((a) => a.name === 'AdminAuthClient') || initializeApp(firebaseConfig, 'AdminAuthClient');
       const auth = getAuth(app);
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      await loginWithGoogleToken(idToken);
+      provider.setCustomParameters({ prompt: 'select_account' });
+
+      // Detect mobile browsers like Android Chrome
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      if (forceRedirect || isMobile) {
+        setAuthNotice('Redirecting to Google Sign-In for Android Chrome / Mobile…');
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const idToken = await result.user.getIdToken(true);
+        await loginWithGoogleToken(idToken);
+      } catch (popupErr: any) {
+        if (
+          popupErr.code === 'auth/popup-blocked' ||
+          popupErr.code === 'auth/popup-closed-by-user' ||
+          popupErr.code === 'auth/cancelled-popup-request' ||
+          popupErr.code === 'auth/operation-not-supported-in-this-environment'
+        ) {
+          console.log('Popup blocked or mobile environment detected, redirecting:', popupErr.code);
+          setAuthNotice('Popup blocked by browser. Redirecting to Google Sign-In…');
+          await signInWithRedirect(auth, provider);
+          return;
+        }
+        throw popupErr;
+      }
     } catch (e: any) {
-      console.warn('Google Sign-In failed or popup closed:', e);
+      console.warn('Google Sign-In failed:', e);
       setAuthErrorNotice(
         e.code === 'auth/popup-closed-by-user'
-          ? 'Sign-in window was closed. Please try again or select an authorized staff role below.'
+          ? 'Sign-in window was closed. Please try again or tap "Sign In (Redirect for Android)" below.'
           : e.message || 'Google authentication failed'
       );
     } finally {
@@ -84,6 +144,7 @@ export const AdminLoginView: React.FC = () => {
 
   const handleRoleLogin = async (role: AdminRole) => {
     setAuthErrorNotice(null);
+    setAuthNotice(null);
     clearError();
     try {
       await loginWithRole(role);
@@ -134,6 +195,17 @@ export const AdminLoginView: React.FC = () => {
 
         {/* Form Body */}
         <div className="p-8 space-y-6">
+          {/* Status Notice for mobile redirect flows */}
+          {authNotice && (
+            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-200 text-sm flex items-start gap-3 animate-fade-in">
+              <Sparkles className="w-5 h-5 text-blue-400 shrink-0 mt-0.5 animate-pulse" />
+              <div className="flex-1">
+                <div className="font-bold">Authentication in Progress</div>
+                <div className="text-xs text-blue-200/90 mt-0.5">{authNotice}</div>
+              </div>
+            </div>
+          )}
+
           {(error || authErrorNotice) && (
             <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-start gap-3 animate-fade-in">
               <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
@@ -145,13 +217,13 @@ export const AdminLoginView: React.FC = () => {
           )}
 
           {/* Primary Google Login Button */}
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-[#889bb6] font-semibold mb-2">
+          <div className="space-y-2.5">
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#889bb6] font-semibold">
               Sign In with Authorized Google Account
             </label>
             <button
               type="button"
-              onClick={handleGoogleSignIn}
+              onClick={() => handleGoogleSignIn(false)}
               disabled={googleLoading || isLoading}
               className="w-full py-3.5 px-5 rounded-xl bg-[#eef4fc] hover:bg-white text-[#0b1424] font-bold text-sm flex items-center justify-center gap-3 transition-all shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer active:scale-[0.99]"
             >
@@ -163,7 +235,19 @@ export const AdminLoginView: React.FC = () => {
               </svg>
               <span>{googleLoading ? 'Verifying with Google…' : 'Continue with Google Account'}</span>
             </button>
-            <p className="text-[11px] text-[#889bb6] text-center mt-2">
+
+            {/* Android Chrome Direct Redirect Button */}
+            <button
+              type="button"
+              onClick={() => handleGoogleSignIn(true)}
+              disabled={googleLoading || isLoading}
+              className="w-full py-2.5 px-4 rounded-xl bg-[#16243d] hover:bg-[#1f3256] text-[#889bb6] hover:text-[#eef4fc] text-xs font-semibold flex items-center justify-center gap-2 border border-[#263857] transition-all cursor-pointer"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-[#4f8fff]" />
+              <span>Android Chrome / Mobile Sign-In (Direct Redirect)</span>
+            </button>
+
+            <p className="text-[11px] text-[#889bb6] text-center pt-1">
               The project owner (<span className="text-[#eef4fc] font-mono">raghavalarence300@gmail.com</span>) is pre-authorized as <b className="text-purple-300">Super Admin</b>.
             </p>
           </div>
